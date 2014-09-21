@@ -1,6 +1,7 @@
 from Tkinter import *
 from os import walk
 import os
+import shutil
 
 class BaseWindow:
 	shows=[]
@@ -25,7 +26,7 @@ class BaseWindow:
 
 		self.elements['headingShow']=Label(self.root,text="Show List")
 		self.elements['headingShow'].grid(row=0,column=0)
-		self.elements['showList']=Listbox(self.root)
+		self.elements['showList']=Listbox(self.root,selectmode=EXTENDED)
 		self.elements['showList'].grid(row=1,column=0,rowspan=20,sticky=N+E+S+W)
 		self.elements['showNameEntry']=Entry(self.root)
 		self.elements['showNameEntry'].grid(row=21,column=0,sticky=E+W)
@@ -38,22 +39,22 @@ class BaseWindow:
 
 		self.elements['headingSeason']=Label(self.root,text="Season List")
 		self.elements['headingSeason'].grid(row=0,column=2)
-		self.elements['seasonsList']=Listbox(self.root)
+		self.elements['seasonsList']=Listbox(self.root,selectmode=EXTENDED)
 		self.elements['seasonsList'].grid(row=1,column=2,rowspan=20,sticky=N+E+S+W)
 		self.elements['seasonNameEntry']=Entry(self.root)
 		self.elements["seasonNameEntry"].grid(row=21,column=2,sticky=E+W)
 		self.elements['seasonsRenameButton']=Button(self.root,text="Rename Season",command=self.renameSeason_call)
 		self.elements['seasonsRenameButton'].grid(row=22,column=2)
-		self.elements['addFilesToSeasonButton']=Button(self.root,text="Add Files To Season")
+		self.elements['addFilesToSeasonButton']=Button(self.root,text="Add Files To Season",command=self.moveFilesToSeason_call)
 		self.elements['addFilesToSeasonButton'].grid(row=23,column=2)
 		self.elements['seasonsList'].bind("<Button-1>",self.seasonInfo_call)
 		self.elements['seasonsList'].bind("<Key>",self.seasonInfo_call)
 
 		self.elements['headingEpisodes']=Label(self.root,text="Episode List")
 		self.elements['headingEpisodes'].grid(row=0,column=4)
-		self.elements['episodesList']=Listbox(self.root)
+		self.elements['episodesList']=Listbox(self.root,selectmode=EXTENDED)
 		self.elements['episodesList'].grid(row=1,column=4,rowspan=20,sticky=N+E+S+W)
-		self.elements['episodesMovetoSeasonButton']=Button(self.root,text="Move To Season")
+		self.elements['episodesMovetoSeasonButton']=Button(self.root,text="Move To Season",command=self.moveFilesFromSeason_call)
 		self.elements['episodesMovetoSeasonButton'].grid(row=21,column=4)
 
 		self.elements['showNameManualLabel']=Label(self.root,text="Show Name")
@@ -156,6 +157,11 @@ class BaseWindow:
 		for x in files:
 			self.elements['episodesList'].insert(END,x)
 			BaseWindow.episodes.append({'name':x,'type':'file'})
+	def redrawEpisodesList(self):
+		self.elements['episodesList'].delete(0,END)
+		for x in BaseWindow.episodes:
+			self.elements['episodesList'].insert(END,x['name'])
+			if x['type']=='folder':self.elements['episodesList'].itemconfig(END,bg='red')
 
 	def showInfo_call(self,ignore=''):self.root.after(1,self.showInfo)
 	def showInfo(self,ignore=""):
@@ -197,6 +203,36 @@ class BaseWindow:
 		newName=self.elements['seasonNameEntry'].get()
 		os.rename(self.location+'/'+BaseWindow.shows[self.curtshow]['name']+'/'+BaseWindow.seasons[self.curtseason]['name'],self.location+'/'+BaseWindow.shows[self.curtshow]['name']+'/'+newName)
 		self.populateSeasons(BaseWindow.shows[self.curtshow]['name'])
+
+	def moveFilesToSeason_call(self,ignore=""):self.root.after(1,self.moveFilesToSeason)
+	def moveFilesToSeason(self,ignore=""):
+		seasonName=self.elements['seasonNameEntry'].get()
+		for x in self.elements['seasonsList'].curselection():
+			index=(int(x))
+			src=self.location+'/'+BaseWindow.shows[self.curtshow]['name']+'/'+BaseWindow.seasons[index]['name']
+			dest=self.location+'/'+BaseWindow.shows[self.curtshow]['name']+'/'+seasonName
+			if not os.path.isdir(dest):os.makedirs(dest)
+			shutil.move(src,dest)
+		self.populateSeasons(BaseWindow.shows[self.curtshow]['name'])
+	def moveFilesFromSeason_call(self,ignore=""):self.root.after(1,self.moveFilesFromSeason)
+	def moveFilesFromSeason(self,ignore=""):
+		print self.elements['episodesList'].curselection()
+		for x in self.elements['episodesList'].curselection():
+			index=(int(x))
+			src=self.location+'/'+BaseWindow.shows[self.curtshow]['name']+'/'+BaseWindow.seasons[self.curtseason]['name']+'/'+BaseWindow.episodes[x]['name']
+			dest=self.location+'/'+BaseWindow.shows[self.curtshow]['name']
+			print src
+			print dest
+			print
+			shutil.move(src,dest)
+		self.populateSeasons(BaseWindow.shows[self.curtshow]['name'])
+
+	def moveEpisodesUp(self,ignore=''):
+		pass
+	def moveEpisodesDown(self,ignore=''):
+		pass
+	def moveEpisodesIgnore(self,ignore=''):
+		pass
 
 	def delete(self,ignore=""):
 		self.root.quit()
