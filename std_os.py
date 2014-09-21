@@ -37,10 +37,7 @@ class files:
 	
 	def file_extension(self,filename):
 		#returns the file extension, such as avi
-		extension=""
-		for x in xrange(1,len(filename)): #for the length of the filename, count up to use going backwards
-			if filename[-x]==".":return extension.lower() #if it is the period ending the extension, retun the extension
-			extension=filename[-x]+extension #go backwards one letter at a time and add it to the extension
+		return filename.split('.')[-1] #return the last part of the name after the dot
 	def filetype(self,filename):
 		#return the type it is as defined in the dictionary above
 		#typical returns are video or audio
