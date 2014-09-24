@@ -2,6 +2,8 @@ from Tkinter import *
 from os import walk
 import os
 import shutil
+from errorWindow import PopupErrorBox
+from ConfirmationWindow import confirmationWindow
 
 class BaseWindow:
 	shows=[]
@@ -26,7 +28,7 @@ class BaseWindow:
 
 		self.elements['headingShow']=Label(self.root,text="Show List")
 		self.elements['headingShow'].grid(row=0,column=0)
-		self.elements['showList']=Listbox(self.root,selectmode=EXTENDED)
+		self.elements['showList']=Listbox(self.root,selectmode=EXTENDED,exportselection=0)
 		self.elements['showList'].grid(row=1,column=0,rowspan=20,sticky=N+E+S+W)
 		self.elements['showNameEntry']=Entry(self.root)
 		self.elements['showNameEntry'].grid(row=21,column=0,sticky=E+W)
@@ -39,7 +41,7 @@ class BaseWindow:
 
 		self.elements['headingSeason']=Label(self.root,text="Season List")
 		self.elements['headingSeason'].grid(row=0,column=2)
-		self.elements['seasonsList']=Listbox(self.root,selectmode=EXTENDED)
+		self.elements['seasonsList']=Listbox(self.root,selectmode=EXTENDED,exportselection=0)
 		self.elements['seasonsList'].grid(row=1,column=2,rowspan=20,sticky=N+E+S+W)
 		self.elements['seasonNameEntry']=Entry(self.root)
 		self.elements["seasonNameEntry"].grid(row=21,column=2,sticky=E+W)
@@ -52,7 +54,7 @@ class BaseWindow:
 
 		self.elements['headingEpisodes']=Label(self.root,text="Episode List")
 		self.elements['headingEpisodes'].grid(row=0,column=4)
-		self.elements['episodesList']=Listbox(self.root,selectmode=EXTENDED)
+		self.elements['episodesList']=Listbox(self.root,selectmode=EXTENDED,exportselection=0)
 		self.elements['episodesList'].grid(row=1,column=4,rowspan=20,sticky=N+E+S+W)
 		self.elements['episodesMovetoSeasonButton']=Button(self.root,text="Move To Season",command=self.moveFilesFromSeason_call)
 		self.elements['episodesMovetoSeasonButton'].grid(row=21,column=4)
@@ -70,14 +72,14 @@ class BaseWindow:
 		self.elements['episodesStartNumberEntry']=Entry(self.root)
 		self.elements['episodesStartNumberEntry'].grid(row=6,column=6)
 
-		self.elements['moveUpEpisode']=Button(self.root,text="Move Up Episode(s)")
+		self.elements['moveUpEpisode']=Button(self.root,text="Move Up Episode(s)",command=self.moveEpisodesUp)
 		self.elements['moveUpEpisode'].grid(row=10,column=6)
-		self.elements['moveIgnoreEpisode']=Button(self.root,text="Ignore Episode(s)")
+		self.elements['moveIgnoreEpisode']=Button(self.root,text="Ignore Episode(s)",command=self.moveEpisodesIgnore)
 		self.elements['moveIgnoreEpisode'].grid(row=11,column=6)
-		self.elements['moveDownEpisode']=Button(self.root,text="Move Down Episode(s)")
+		self.elements['moveDownEpisode']=Button(self.root,text="Move Down Episode(s)",command=self.moveEpisodesDown)
 		self.elements['moveDownEpisode'].grid(row=12,column=6)
 
-		self.elements["convertButton"]=Button(self.root,text="Rename All The Season")
+		self.elements["convertButton"]=Button(self.root,text="Rename All The Season",command=self.massRenameSeason)
 		self.elements['convertButton'].grid(row=21,column=6)
 
 		self.elements['settingsButton']=Button(self.root,text="Change Settings")
@@ -221,18 +223,100 @@ class BaseWindow:
 			index=(int(x))
 			src=self.location+'/'+BaseWindow.shows[self.curtshow]['name']+'/'+BaseWindow.seasons[self.curtseason]['name']+'/'+BaseWindow.episodes[x]['name']
 			dest=self.location+'/'+BaseWindow.shows[self.curtshow]['name']
-			print src
-			print dest
-			print
 			shutil.move(src,dest)
 		self.populateSeasons(BaseWindow.shows[self.curtshow]['name'])
 
 	def moveEpisodesUp(self,ignore=''):
-		pass
+		indexes=[]
+		for x in self.elements['episodesList'].curselection():
+			indexes.append(int(x))
+		#we have the indecies already in assending order
+		if indexes[0]==0: return
+		for x in indexes:
+			temp=BaseWindow.episodes[x-1]
+			BaseWindow.episodes[x-1]=BaseWindow.episodes[x]
+			BaseWindow.episodes[x]=temp
+		self.redrawEpisodesList()
+		for x in indexes:
+			self.elements['episodesList'].selection_set(x-1) #reselects the old items so we can mash the upp button
 	def moveEpisodesDown(self,ignore=''):
-		pass
+		indexes=[]
+		for x in self.elements['episodesList'].curselection():
+			indexes.append(int(x))
+		indexes.sort(key=lambda x: 99999-x) #sort into desending order so we move from bottom up
+		if indexes[-1]==len(BaseWindow.episodes)-1: return
+		for x in indexes:
+			temp=BaseWindow.episodes[x+1]
+			BaseWindow.episodes[x+1]=BaseWindow.episodes[x]
+			BaseWindow.episodes[x]=temp
+		self.redrawEpisodesList()
+		for x in indexes:
+			self.elements['episodesList'].selection_set(x+1) #reselects the old items so we can mash the down button
 	def moveEpisodesIgnore(self,ignore=''):
-		pass
+		indexes=[]
+		for x in self.elements['episodesList'].curselection():
+			indexes.append(int(x))
+		indexes.sort(key=lambda x: 99999-x) #sort into desending order so we move from bottom up
+		for x in indexes:
+			del BaseWindow.episodes[x]
+		self.redrawEpisodesList()
+
+	def massRenameSeason(self,ignore=""):
+		#series name
+		show=self.elements['showNameManualEntry'].get()
+		if len(show)==0:show=BaseWindow.shows[self.curtshow]['name']
+		#season number
+		season=self.elements['seasonStartNumberEntry'].get()
+		if len(season)==0:
+			season=self.elements['seasonNameEntry'].get().split()[-1]
+		if len(season)==0:
+			season=1
+		try:
+			season=int(season)
+		except:
+			PopupErrorBox(self.root,"Unable to use \n"+str(season)+"\nas the season NUMBER")
+			return
+		#episode number
+		episode=self.elements['episodesStartNumberEntry'].get()
+		if len(episode)==0:
+			episode=1
+		try:
+			episode=int(episode)
+		except:
+			PopupErrorBox(self.root,"Unable to use \n"+str(episode)+"\nas the episode NUMBER")
+			return
+
+		#get the folder location
+		base=self.location+'/'+BaseWindow.shows[self.curtshow]['name']+'/'+BaseWindow.seasons[self.curtseason]['name']+'/'
+		print base
+
+		#make the episode names
+		names=[]
+		info=open(self.location+'/'+BaseWindow.shows[self.curtshow]['name']+'/changes.info','a')
+		for x in BaseWindow.episodes:
+			if x["type"]=='folder':continue
+			names.append([x["name"],show+'.s'+self.__zeroPad(season,5)+'e'+self.__zeroPad(episode,5)+'.'+self.__filetype(x['name'])])
+			print names[-1][0]+'  -->  '+names[-1][1]
+			info.write(names[-1][0]+'  -->  '+names[-1][1]+'\n')
+			episode+=1
+		info.close()
+
+		#confirmation Window Here
+		confirm=confirmationWindow(self.root,names)
+		if confirm.result==False or confirm.result==None: return
+
+		for x in names:
+			shutil.move(base+x[0],base+x[1])
+		self.populateEpisodes(BaseWindow.seasons[self.curtseason]['name'])
+	def __zeroPad(self,number,places):
+		#makes a zero-padded number in string form with the total length of places
+		#EXAMPLE: number=27 places=6  returns  "000027"
+		number=str(number)
+		while len(number)<places: number='0'+number
+		return number
+	def __filetype(self,name):
+		#returns things like mkv or avi
+		return name.split('.')[-1]
 
 	def delete(self,ignore=""):
 		self.root.quit()
