@@ -1,6 +1,7 @@
 from BaseWindow import BaseWindow
+from sys import path
 
-temp=open('settings.info','r')
+temp=open(path[0]+'/settings.info','r')
 
 location=''
 for x in temp: #for every line
