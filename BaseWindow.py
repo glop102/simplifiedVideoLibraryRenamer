@@ -4,6 +4,7 @@ import os
 import shutil
 from errorWindow import PopupErrorBox
 from ConfirmationWindow import confirmationWindow
+from SettingsWindow import SettingsWindow
 
 class BaseWindow:
 	shows=[]
@@ -82,7 +83,7 @@ class BaseWindow:
 		self.elements["convertButton"]=Button(self.root,text="Rename All The Season",command=self.massRenameSeason)
 		self.elements['convertButton'].grid(row=21,column=6)
 
-		self.elements['settingsButton']=Button(self.root,text="Change Settings")
+		self.elements['settingsButton']=Button(self.root,text="Change Settings",command=self.__settingsMenu)
 		self.elements['settingsButton'].grid(row=23,column=6)
 
 	def populateShows(self):
@@ -317,6 +318,9 @@ class BaseWindow:
 	def __filetype(self,name):
 		#returns things like mkv or avi
 		return name.split('.')[-1]
+
+	def __settingsMenu(self):
+		SettingsWindow(self)
 
 	def delete(self,ignore=""):
 		self.root.quit()
