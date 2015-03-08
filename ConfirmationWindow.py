@@ -20,25 +20,32 @@ class confirmationWindow(Toplevel):
 
 	def body(self):
 		wwww=50
-		hhhh=20
+		hhhh=26  #seems there are 13 or 26 episodes in an anime SO lets make it that tall anyways
 		self.elements={}
 		self.elements['leftLabel']=Label(self,text="Original")
 		self.elements['leftLabel'].grid(row=0,column=0)
 		self.elements['leftList']=Listbox(self,width=wwww,height=hhhh)
-		self.elements['leftList'].grid(row=1,column=0)
+		self.elements['leftList'].grid(row=1,column=0,sticky=N+S+E+W)
 		self.elements['confirmButton']=Button(self,text="Confirm",command=self.confirm)
 		self.elements['confirmButton'].grid(row=2,column=0)
 
 		self.elements['rightLabel']=Label(self,text="New Names")
 		self.elements['rightLabel'].grid(row=0,column=1)
 		self.elements['rightList']=Listbox(self,width=wwww,height=hhhh)
-		self.elements['rightList'].grid(row=1,column=1)
+		self.elements['rightList'].grid(row=1,column=1,sticky=N+S+E+W)
 		self.elements['confirmButton']=Button(self,text="Cancel",command=self.cancel)
 		self.elements['confirmButton'].grid(row=2,column=1)
 
 		for x in self.files:
 			self.elements['leftList'].insert(END,x[0])
 			self.elements['rightList'].insert(END,x[1])
+
+		#allow the window to expand horizontally
+		Grid.grid_columnconfigure(self,0,weight=2) #the left side is ussually longer
+		Grid.grid_columnconfigure(self,1,weight=1)
+
+		#allow the grid to expand vertically
+		Grid.grid_rowconfigure(self,1,weight=1)
 
 	def confirm(self):
 		self.result=True
