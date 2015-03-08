@@ -47,6 +47,15 @@ class confirmationWindow(Toplevel):
 		#allow the grid to expand vertically
 		Grid.grid_rowconfigure(self,1,weight=1)
 
+		#combine the scrolling of both listboxes
+		self.elements['leftList'].bind("<MouseWheel>",self.scrollingEvent)
+		self.elements['rightList'].bind("<MouseWheel>",self.scrollingEvent)
+
+	def scrollingEvent(self,event):
+		self.elements['leftList'].yview('scroll',event.delta,'units');
+		self.elements['rightList'].yview('scroll',event.delta,'units');
+		print event.delta
+
 	def confirm(self):
 		self.result=True
 		self.delete()
