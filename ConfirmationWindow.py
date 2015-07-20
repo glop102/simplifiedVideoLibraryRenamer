@@ -51,10 +51,30 @@ class confirmationWindow(Toplevel):
 		self.elements['leftList'].bind("<MouseWheel>",self.scrollingEvent)
 		self.elements['rightList'].bind("<MouseWheel>",self.scrollingEvent)
 
+		#linux version of the scroll wheel
+		self.elements['leftList'].bind("<Button-4>",self.scrollingEvent_UP)
+		self.elements['rightList'].bind("<Button-4>",self.scrollingEvent_UP)
+		self.elements['leftList'].bind("<Button-5>",self.scrollingEvent_DOWN)
+		self.elements['rightList'].bind("<Button-5>",self.scrollingEvent_DOWN)
+
 	def scrollingEvent(self,event):
-		self.elements['leftList'].yview('scroll',event.delta,'units');
-		self.elements['rightList'].yview('scroll',event.delta,'units');
-		print event.delta
+		print "Scroll Delta:  ",event.delta
+		if(event.widget==self.elements['rightList']): #only scroll the other list box so we dont scroll the current listbox twice
+			self.elements['leftList'].yview('scroll',event.delta,'units');
+		else:
+			self.elements['rightList'].yview('scroll',event.delta,'units');
+	def scrollingEvent_UP(self,event):
+		print "Scroll Delta:  ",-5
+		if(event.widget==self.elements['rightList']): #only scroll the other list box so we dont scroll the current listbox twice
+			self.elements['leftList'].yview('scroll',-5,'units');
+		else:
+			self.elements['rightList'].yview('scroll',-5,'units');
+	def scrollingEvent_DOWN(self,event):
+		print "Scroll Delta:  ",5
+		if(event.widget==self.elements['rightList']): #only scroll the other list box so we dont scroll the current listbox twice
+			self.elements['leftList'].yview('scroll',5,'units');
+		else:
+			self.elements['rightList'].yview('scroll',5,'units');
 
 	def confirm(self):
 		self.result=True

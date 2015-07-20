@@ -25,11 +25,11 @@ class SettingsWindow(Toplevel):
 		Toplevel.destroy(self)
 	def body(self):
 		self.labelLocation=Label(self,text="Library Location: ")
-		self.entryLocation=Entry(self)
+		self.entryLocation=Entry(self,width=50)
 		self.entryLocation.insert(0,self.parent.location)
 		self.entryLocation.bind("<Button-1>",self.browse) #use a file dialog to get the new location
-		self.labelLocation.grid(row=0,column=0)
-		self.entryLocation.grid(row=0,column=1)
+		self.labelLocation.grid(row=0,column=0,sticky=W+N)
+		self.entryLocation.grid(row=0,column=1,sticky=N+W+E)
 
 		self.confirmButton=Button(self,text="Confirm",command=self.confirm)
 		self.confirmButton.grid(row=2,column=0,columnspan=2)
