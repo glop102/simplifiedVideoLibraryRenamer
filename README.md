@@ -7,5 +7,5 @@ After downloading a show from various sources, the files typically will have odd
 
 The File Structure
  * <ShowName> Main Folder
- * * <Season #> Season folder
- * * * Episodes
+ * <Season #> Season folder
+ * Episodes
