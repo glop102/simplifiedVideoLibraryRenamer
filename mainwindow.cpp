@@ -1,16 +1,143 @@
 #include "mainwindow.h"
 
+QTextStream& qStdOut() {
+	static QTextStream ts( stdout );
+	return ts;
+	//usage
+	//qStdOut() << thing;
+	//qStdOut().flush();
+}
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 	centralWidget = new QWidget(this);
 	this->setCentralWidget(centralWidget);
 	createLayouts();
 	createWidgets();
+	createConnections();
+
+	GlopConfig::Settings s = GlopConfig::ParseFile("settings.conf");
+	importLocation = QString::fromStdString(s.values["import location"]);
+	libraryLocation = QString::fromStdString(s.values["library location"]);
+
+	listShows(importLocation);
 }
 
-MainWindow::~MainWindow()
-{
-
+MainWindow::~MainWindow(){
+	// screw deleting all the widgets, they are deleted automatically for us
 }
+
+//========================================================================================================================================================================================
+void MainWindow::listShows(QString location){
+	showList->clear(); // make it empty so we only need to worry about adding items
+	seasonList->clear();
+	episodeList->clear();
+
+	QFileInfo info(location);
+	if(!info.isDir()) return; // cant list contents unless is a folder
+
+	QDir loc(location);
+	if(!loc.exists()){
+		// TODO - OPEN SETTINGS WINDOW
+		qStdOut() << "unable to open location : " << location << "\n" ;
+		qStdOut().flush();
+		return;
+	}
+	QStringList list = loc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for(int x=0; x<list.length(); x++){
+		showList->addItem(list[x]);
+	}
+
+	list = loc.entryList(QDir::Files);
+	for(int x=0; x<list.length(); x++){
+		QListWidgetItem *temp = new QListWidgetItem(list[x]);
+		temp->setBackground(Qt::red);
+		showList->addItem(temp);
+	}
+}
+
+void MainWindow::listShowContents(QString location){
+	seasonList->clear(); // make it empty so we only need to worry about adding items
+	episodeList->clear();
+
+	QFileInfo info(location);
+	if(!info.isDir()) return; // cant list contents unless is a folder
+
+	QDir loc(location);
+	if(!loc.exists()){
+		qStdOut() << "unable to open location : " << location << "\n" ;
+		qStdOut().flush();
+		return;
+	}
+	QStringList list = loc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for(int x=0; x<list.length(); x++){
+		seasonList->addItem(list[x]);
+	}
+
+	list = loc.entryList(QDir::Files);
+	for(int x=0; x<list.length(); x++){
+		QListWidgetItem *temp = new QListWidgetItem(list[x]);
+		temp->setBackground(Qt::red);
+		seasonList->addItem(temp);
+	}
+}
+
+void MainWindow::listSeasonContents(QString location){
+	episodeList->clear(); // make it empty so we only need to worry about adding items
+
+	QFileInfo info(location);
+	if(!info.isDir()) return; // cant list contents unless is a folder
+
+	QDir loc(location);
+	if(!loc.exists()){
+		qStdOut() << "unable to open location : " << location << "\n" ;
+		qStdOut().flush();
+		return;
+	}
+	QStringList list = loc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for(int x=0; x<list.length(); x++){
+		QListWidgetItem *temp = new QListWidgetItem(list[x]);
+		temp->setBackground(Qt::red);
+		episodeList->addItem(temp);
+	}
+
+	list = loc.entryList(QDir::Files);
+	for(int x=0; x<list.length(); x++){
+		episodeList->addItem(list[x]);
+	}
+}
+
+void MainWindow::showListClicked(QListWidgetItem *current){
+	if(current == NULL) return;
+	listShowContents(importLocation+"/"+
+					 current->text()
+					 );
+	belowListWidgets.showNameEntry->setText(current->text()); // make it easy to rename a show
+	belowListWidgets.seasonNameEntry->setText("");
+
+	//populate the overrides with save defaults
+	overrideSettingsWidgets.showNameEdit->setText(current->text());
+	overrideSettingsWidgets.seasonNumberEdit->setValue(1);
+	overrideSettingsWidgets.episodeStartingNumberEdit->setValue(1);
+}
+void MainWindow::seasonListClicked(QListWidgetItem *current){
+	if(current == NULL) return;
+	listSeasonContents(importLocation+"/"+
+					   showList->currentItem()->text()+"/"+
+					   current->text()
+					   );
+	belowListWidgets.seasonNameEntry->setText(current->text()); // make it easy to rename a season
+
+	// now parse the name and see if we understand the season number
+	// and then put that number into the override box
+	QString name = current->text().toLower();
+	QStringList parts = name.split(" "); // split along spaces
+	if( parts.size()==2 && parts[0]=="season" ){ // we only understand the format of "season #"
+		int seasonNumber = parts[1].toInt(); // assume the second entry is the number
+		overrideSettingsWidgets.seasonNumberEdit->setValue(seasonNumber); // set it without bothering if was a valid conversion - returns 0 if it failed which is fine
+	}
+}
+
+//========================================================================================================================================================================================
 
 void MainWindow::createLayouts(){
 	mainLayout = new QGridLayout();
@@ -41,16 +168,21 @@ void MainWindow::createWidgets(){
 	mainLayout->addWidget(showList,1,1,2,1);
 	mainLayout->addWidget(seasonList,1,2,1,1); // only spans 1 row to accomodate the extra buttons under it
 	mainLayout->addWidget(episodeList,1,3,2,1);
+	showList->setSelectionMode(QAbstractItemView::ExtendedSelection);   // let the user select multiple items in the list
+	seasonList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	episodeList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
 	//==============================================================================================
 	//override settings on the right side of the window
 	settingsButton = new QPushButton("Settings");
 	overrideSettingsWidgets.showNameEdit = new QLineEdit();
-	overrideSettingsWidgets.seasonNumberEdit = new QLineEdit();
-	overrideSettingsWidgets.episodeStartingNumberEdit = new QLineEdit();
+	overrideSettingsWidgets.seasonNumberEdit = new QSpinBox();
+	overrideSettingsWidgets.episodeStartingNumberEdit = new QSpinBox();
 	overrideSettingsWidgets.moveEpisode_Up_button = new QPushButton("Move Up");
 	overrideSettingsWidgets.moveEpisode_Ignore_button = new QPushButton("Ignore");
 	overrideSettingsWidgets.moveEpisode_Down_button = new QPushButton("Move Down");
+
+	overrideSettingsWidgets.episodeStartingNumberEdit->setMaximum(10000); // just in case we ever have 10000 episodes in a season
 
 	overrideSettingsLayout->addWidget(settingsButton);
 	overrideSettingsLayout->addWidget( new QLabel("Overriding Parameters") );
@@ -74,7 +206,7 @@ void MainWindow::createWidgets(){
 	seasonButtonWidgets.season5Button = new QPushButton("S5");
 	seasonButtonWidgets.extraButton = new QPushButton("extra");
 	seasonButtonWidgets.seasonOtherButton = new QPushButton("Season");
-	seasonButtonWidgets.seasonOtherEntry = new QLineEdit();
+	seasonButtonWidgets.seasonOtherEntry = new QSpinBox();
 
 	seasonButtonsLayout->addWidget(seasonButtonWidgets.season1Button,1,1,Qt::AlignTop);
 	seasonButtonsLayout->addWidget(seasonButtonWidgets.season2Button,1,2,Qt::AlignTop);
@@ -105,4 +237,9 @@ void MainWindow::createWidgets(){
 
 	mainLayout->addWidget(renameSeasonButton,3,4);
 	mainLayout->addWidget(moveShowToLibraryButton,4,4);
+}
+
+void MainWindow::createConnections(){
+	connect(showList,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),this,SLOT(showListClicked(QListWidgetItem*)) );
+	connect(seasonList,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),this,SLOT(seasonListClicked(QListWidgetItem*)) );
 }

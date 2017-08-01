@@ -25,7 +25,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    glopConfig.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    glopConfig.h
