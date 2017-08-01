@@ -137,6 +137,76 @@ void MainWindow::seasonListClicked(QListWidgetItem *current){
 	}
 }
 
+void MainWindow::renameShow(){
+	QString oldName, newName;
+	int currentIndex;
+	oldName = importLocation + "/" + showList->currentItem()->text();
+	newName = importLocation + "/" + belowListWidgets.showNameEntry->text();
+	currentIndex = showList->currentRow();
+
+	if(oldName == newName) return;
+
+	renameFileOrFolder(oldName,newName);
+
+	listShows(importLocation);
+	showList->setCurrentRow(currentIndex%showList->count()); // ensure that one of the items in the list is counted as activated
+}
+
+void MainWindow::renameSeason(){
+	QString oldName, newName;
+	int currentIndex;
+	oldName = importLocation + "/" + showList->currentItem()->text() + "/" + seasonList->currentItem()->text();
+	newName = importLocation + "/" + showList->currentItem()->text() + "/" + belowListWidgets.seasonNameEntry->text();
+	currentIndex = seasonList->currentRow();
+
+	if(oldName == newName) return;
+
+	renameFileOrFolder(oldName,newName);
+
+	listShowContents(importLocation+"/"+showList->currentItem()->text());
+	seasonList->setCurrentRow(currentIndex%seasonList->count()); // ensure that one of the items in the list is counted as activated
+}
+
+void MainWindow::addSeasonPressed(){
+	//first lets find out who made the event
+	QObject *sender = QObject::sender();
+
+	//Now figure out what to do
+	QString newFolder;
+	if(sender == seasonButtonWidgets.season0Button)
+		newFolder = "Season 0";
+	if(sender == seasonButtonWidgets.season1Button)
+		newFolder = "Season 1";
+	if(sender == seasonButtonWidgets.season2Button)
+		newFolder = "Season 2";
+	if(sender == seasonButtonWidgets.season3Button)
+		newFolder = "Season 3";
+	if(sender == seasonButtonWidgets.season4Button)
+		newFolder = "Season 4";
+	if(sender == seasonButtonWidgets.season5Button)
+		newFolder = "Season 5";
+	if(sender == seasonButtonWidgets.seasonOtherButton)
+		newFolder = "Season " + QString::number(seasonButtonWidgets.seasonOtherEntry->value()) ;
+	if(sender == seasonButtonWidgets.extraButton)
+		newFolder = "Extra";
+
+	if(newFolder.length() == 0){
+		qWarning("addSeasonPressed() : unknown and unhandeled callback to here\nDid you forget to add something?\n");
+		return;
+	}
+
+	//Now we get a list of filenames from the season list that are to be moved
+	QList<QListWidgetItem*> names = seasonList->selectedItems();
+	QStringList paths;
+	QString showName = showList->currentItem()->text();
+	if(names.length()==0) return; // dont make empty folders
+	for(int x=0; x<names.length(); x++){
+		paths.push_back(importLocation+"/"+showName+"/"+names[x]->text());
+	}
+	moveFilesToFolder(paths,importLocation+"/"+showName+"/"+newFolder);
+	listShowContents(importLocation+"/"+showName);
+}
+
 //========================================================================================================================================================================================
 
 void MainWindow::createLayouts(){
@@ -242,4 +312,53 @@ void MainWindow::createWidgets(){
 void MainWindow::createConnections(){
 	connect(showList,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),this,SLOT(showListClicked(QListWidgetItem*)) );
 	connect(seasonList,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),this,SLOT(seasonListClicked(QListWidgetItem*)) );
+
+	connect(belowListWidgets.showRenameButton,SIGNAL(clicked(bool)),this,SLOT(renameShow()) );
+	connect(belowListWidgets.showNameEntry,SIGNAL(returnPressed()),this,SLOT(renameShow()) );
+	connect(belowListWidgets.seasonRenameButton,SIGNAL(clicked(bool)),this,SLOT(renameSeason()) );
+	connect(belowListWidgets.seasonNameEntry,SIGNAL(returnPressed()),this,SLOT(renameSeason()) );
+
+	connect(seasonButtonWidgets.extraButton,SIGNAL(clicked(bool)),this,SLOT(addSeasonPressed()) );
+	connect(seasonButtonWidgets.season0Button,SIGNAL(clicked(bool)),this,SLOT(addSeasonPressed()) );
+	connect(seasonButtonWidgets.season1Button,SIGNAL(clicked(bool)),this,SLOT(addSeasonPressed()) );
+	connect(seasonButtonWidgets.season2Button,SIGNAL(clicked(bool)),this,SLOT(addSeasonPressed()) );
+	connect(seasonButtonWidgets.season3Button,SIGNAL(clicked(bool)),this,SLOT(addSeasonPressed()) );
+	connect(seasonButtonWidgets.season4Button,SIGNAL(clicked(bool)),this,SLOT(addSeasonPressed()) );
+	connect(seasonButtonWidgets.season5Button,SIGNAL(clicked(bool)),this,SLOT(addSeasonPressed()) );
+	connect(seasonButtonWidgets.seasonOtherButton,SIGNAL(clicked(bool)),this,SLOT(addSeasonPressed()) );
+}
+
+void MainWindow::renameFileOrFolder(QString oldName, QString newName){
+	QFileInfo source(oldName);
+	QFileInfo dest(newName);
+	if(source.isDir()){
+		if(!dest.exists())
+			QDir().rename(oldName,newName);
+		else{
+			//merge the folders
+			QDir sd(oldName); // source directory
+			QStringList list = sd.entryList(QDir::NoDotAndDotDot|QDir::Files|QDir::Dirs);
+			for(int x=0; x<list.length(); x++){
+				sd.rename(oldName+"/"+list[x],newName+"/"+list[x]); // move the files into the new folder
+			}
+			sd.rmdir(oldName); // safely fails if not empty
+		}
+	}else{
+		if(!dest.exists())
+			QFile::rename(oldName,newName);
+		//else do nothing
+	}
+}
+
+void MainWindow::moveFilesToFolder(QStringList files, QString folder){
+	QFileInfo destFolder(folder);
+	if(!destFolder.exists()){
+		QDir().mkpath(folder); // make the folder
+	}else if(destFolder.isFile())
+		return; // cant move files into a file :P
+
+	for(int x=0; x<files.length(); x++){
+		QFileInfo source(files[x]);
+		renameFileOrFolder(files[x],folder+"/"+source.fileName()); // move the file to the new location - does merge folders
+	}
 }

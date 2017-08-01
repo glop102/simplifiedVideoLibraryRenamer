@@ -47,7 +47,12 @@ public slots:
 	void showListClicked(QListWidgetItem * current);
 	void seasonListClicked(QListWidgetItem * current);
 
-private:
+	void renameShow();	// called when the rename buttons are pressed
+	void renameSeason();
+
+	void addSeasonPressed();
+
+private: // widgets
 	QGridLayout* mainLayout; // counting from 1 and up for rows and columns
 	QGridLayout* seasonButtonsLayout; // under the list for the season
 	QVBoxLayout* overrideSettingsLayout; //on the right side
@@ -78,9 +83,13 @@ private:
 	QPushButton *renameSeasonButton; // renames all episodes in the selected season based on settings
 	QPushButton *moveShowToLibraryButton; // moves the entire show into the library folder specified
 
-private:
+private: // state variables
 	QString importLocation; // the folder that we have the lists show and we manipulate
 	QString libraryLocation; // where we copy/move shows into from the import location
+
+private:
+	void renameFileOrFolder(QString oldName,QString newName); // trys to rename, but if is a folder, will try merging also
+	void moveFilesToFolder(QStringList files,QString folder); // NOTE: also can pass in folders to the file-list
 };
 
 #endif // MAINWINDOW_H
