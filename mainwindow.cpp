@@ -121,6 +121,7 @@ void MainWindow::showListClicked(QListWidgetItem *current){
 }
 void MainWindow::seasonListClicked(QListWidgetItem *current){
 	if(current == NULL) return;
+	if(showList->currentItem() == NULL) return;
 	listSeasonContents(importLocation+"/"+
 					   showList->currentItem()->text()+"/"+
 					   current->text()
@@ -138,6 +139,7 @@ void MainWindow::seasonListClicked(QListWidgetItem *current){
 }
 
 void MainWindow::renameShow(){
+	if(showList->currentItem() == NULL) return;
 	QString oldName, newName;
 	int currentIndex;
 	oldName = importLocation + "/" + showList->currentItem()->text();
@@ -153,6 +155,8 @@ void MainWindow::renameShow(){
 }
 
 void MainWindow::renameSeason(){
+	if(showList->currentItem() == NULL) return;
+	if(seasonList->currentItem() == NULL) return;
 	QString oldName, newName;
 	int currentIndex;
 	oldName = importLocation + "/" + showList->currentItem()->text() + "/" + seasonList->currentItem()->text();
@@ -168,6 +172,7 @@ void MainWindow::renameSeason(){
 }
 
 void MainWindow::addSeasonPressed(){
+	if(showList->currentItem() == NULL) return;
 	//first lets find out who made the event
 	QObject *sender = QObject::sender();
 
