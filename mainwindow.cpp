@@ -374,6 +374,19 @@ void MainWindow::changeEpisodeOrderPressed(){
 	}
 }
 
+void MainWindow::showSettingsDialog(){
+	QDir configLocation(QDir::homePath()+"/.config/glop_conf");
+	if(!configLocation.exists())
+		configLocation.mkpath(QDir::homePath()+"/.config/glop_conf");
+	GlopConfig::Settings s = GlopConfig::ParseFile( (QDir::homePath()+"/.config/glop_conf/simplifiedVideoLibraryRenamer.conf").toStdString() );
+
+	SettingsDialog d(s);
+	d.exec();
+	s = d.getSettings();
+	GlopConfig::SaveToFile( (QDir::homePath()+"/.config/glop_conf/simplifiedVideoLibraryRenamer.conf").toStdString() , s);
+	loadConfig();
+}
+
 //========================================================================================================================================================================================
 
 void MainWindow::createLayouts(){
@@ -502,6 +515,7 @@ void MainWindow::createConnections(){
 	connect(belowListWidgets.moveToShowListButton,SIGNAL(clicked(bool)),this,SLOT(generalMoveFilesPressed()) );
 	connect(belowListWidgets.addToShowButton,SIGNAL(clicked(bool)),this,SLOT(generalMoveFilesPressed()) );
 
+	connect(settingsButton,SIGNAL(clicked(bool)),this,SLOT(showSettingsDialog()) );
 	connect(overrideSettingsWidgets.moveEpisode_Up_button,SIGNAL(clicked(bool)),this,SLOT(changeEpisodeOrderPressed()) );
 	connect(overrideSettingsWidgets.moveEpisode_Ignore_button,SIGNAL(clicked(bool)),this,SLOT(changeEpisodeOrderPressed()) );
 	connect(overrideSettingsWidgets.moveEpisode_Down_button,SIGNAL(clicked(bool)),this,SLOT(changeEpisodeOrderPressed()) );
@@ -517,18 +531,22 @@ void MainWindow::loadConfig(){
 	GlopConfig::Settings s = GlopConfig::ParseFile( (QDir::homePath()+"/.config/glop_conf/simplifiedVideoLibraryRenamer.conf").toStdString() );
 	importLocation = QString::fromStdString(s.values["import location"]);
 	libraryLocation = QString::fromStdString(s.values["library location"]);
-	// TODO - OPEN SETTINGS WINDOW
 	importLocation = QFileInfo(importLocation).absoluteFilePath();
 	libraryLocation = QFileInfo(libraryLocation).absoluteFilePath();
 
 	QString temp = QString::fromStdString(s.values["season number length"]);
-	bool ok;
-	seasonNumberLength = temp.toInt(&ok);
-	if(!ok) seasonNumberLength = 5;
+	bool ok1,ok2;
+	seasonNumberLength = temp.toInt(&ok1);
+	if(!ok1) seasonNumberLength = 5;
 
 	temp = QString::fromStdString(s.values["episode number length"]);
-	episodeNumberLength = temp.toInt(&ok);
-	if(!ok) episodeNumberLength = 5;
+	episodeNumberLength = temp.toInt(&ok2);
+	if(!ok2) episodeNumberLength = 5;
+
+	if(!(ok1 && ok2)){
+		// TODO - OPEN SETTINGS WINDOW
+		saveConfig(); // make sure theconfig exists
+	}
 }
 void MainWindow::saveConfig(){
 	QDir configLocation(QDir::homePath()+"/.config/glop_conf");

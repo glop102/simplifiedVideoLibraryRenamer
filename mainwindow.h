@@ -18,6 +18,7 @@
 #include <QFileInfo>
 
 #include "glopConfig.h"
+#include "settingsdialog.h"
 
 /*
  * Asumptions Made
@@ -59,6 +60,8 @@ public slots:
 	void moveShowToLibraryPressed();
 
 	void changeEpisodeOrderPressed(); // called by Move Up/Down buttons - ALSO IGNORE BUTTON
+
+	void showSettingsDialog();
 
 private: // widgets
 	QGridLayout* mainLayout; // counting from 1 and up for rows and columns
