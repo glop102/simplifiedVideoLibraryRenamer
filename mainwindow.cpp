@@ -385,6 +385,7 @@ void MainWindow::showSettingsDialog(){
 	s = d.getSettings();
 	GlopConfig::SaveToFile( (QDir::homePath()+"/.config/glop_conf/simplifiedVideoLibraryRenamer.conf").toStdString() , s);
 	loadConfig();
+	listShows(importLocation); // refresh if in a new directory
 }
 
 //========================================================================================================================================================================================
@@ -526,16 +527,17 @@ void MainWindow::createConnections(){
 
 void MainWindow::loadConfig(){
 	QDir configLocation(QDir::homePath()+"/.config/glop_conf");
+	bool ok1,ok2,ok3;
 	if(!configLocation.exists())
 		configLocation.mkpath(QDir::homePath()+"/.config/glop_conf");
 	GlopConfig::Settings s = GlopConfig::ParseFile( (QDir::homePath()+"/.config/glop_conf/simplifiedVideoLibraryRenamer.conf").toStdString() );
 	importLocation = QString::fromStdString(s.values["import location"]);
 	libraryLocation = QString::fromStdString(s.values["library location"]);
-	importLocation = QFileInfo(importLocation).absoluteFilePath();
+	ok3 = importLocation.length()>0;
+	importLocation = QFileInfo(importLocation).absoluteFilePath(); // returns current dir if empty string
 	libraryLocation = QFileInfo(libraryLocation).absoluteFilePath();
 
 	QString temp = QString::fromStdString(s.values["season number length"]);
-	bool ok1,ok2;
 	seasonNumberLength = temp.toInt(&ok1);
 	if(!ok1) seasonNumberLength = 5;
 
@@ -543,9 +545,8 @@ void MainWindow::loadConfig(){
 	episodeNumberLength = temp.toInt(&ok2);
 	if(!ok2) episodeNumberLength = 5;
 
-	if(!(ok1 && ok2)){
-		// TODO - OPEN SETTINGS WINDOW
-		saveConfig(); // make sure theconfig exists
+	if(!(ok1 && ok2 && ok3)){
+		showSettingsDialog();
 	}
 }
 void MainWindow::saveConfig(){

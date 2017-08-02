@@ -61,7 +61,7 @@ void SettingsDialog::createWidgets(){
 	exampleNamedEpisode = new QLabel("example show name here");
 	importLocationButton = new QPushButton("Import Location");
 	importLocationEntry = new QLineEdit();
-	libraryLocationButton = new QPushButton("Library Location");
+	libraryLocationButton = new QPushButton("Library Location (Optional)");
 	libraryLocationEntry = new QLineEdit();
 	okButton = new QPushButton("OK");
 	cancelButton = new QPushButton("Cancel");
