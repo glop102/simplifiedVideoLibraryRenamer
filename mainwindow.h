@@ -55,9 +55,10 @@ public slots:
 	void renameEpisodes();
 
 	void addSeasonPressed(); // move files into a folder for a season
-	void changeEpisodeOrderPressed(); // called by Move Up/Down buttons - ALSO IGNORE BUTTON
-
 	void generalMoveFilesPressed(); // moveLeft and addToShow
+	void moveShowToLibraryPressed();
+
+	void changeEpisodeOrderPressed(); // called by Move Up/Down buttons - ALSO IGNORE BUTTON
 
 private: // widgets
 	QGridLayout* mainLayout; // counting from 1 and up for rows and columns
@@ -98,8 +99,8 @@ private: // state variables
 	int episodeNumberLength; // same as season
 
 private:
-	void renameFileOrFolder(QString oldName,QString newName); // trys to rename, also if is a folder, will try merging if already folder there
-	void moveFilesToFolder(QStringList files,QString folder); // NOTE: also can pass in folders to the file-list
+	bool renameFileOrFolder(QString oldName,QString newName); // trys to rename, also if is a folder, will try merging if already folder there
+	bool moveFilesToFolder(QStringList files,QString folder); // NOTE: also can pass in folders to the file-list
 };
 
 #endif // MAINWINDOW_H

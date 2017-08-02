@@ -1,12 +1,12 @@
 #include "mainwindow.h"
 
-QTextStream& qStdOut() {
-	static QTextStream ts( stdout );
-	return ts;
-	//usage
-	//qStdOut() << thing;
-	//qStdOut().flush();
-}
+//QTextStream& qStdOut() {
+//	static QTextStream ts( stdout );
+//	return ts;
+//	//usage
+//	//qStdOut() << thing;
+//	//qStdOut().flush();
+//}
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 	centralWidget = new QWidget(this);
@@ -36,9 +36,7 @@ void MainWindow::listShows(QString location){
 
 	QDir loc(location);
 	if(!loc.exists()){
-		// TODO - OPEN SETTINGS WINDOW
-		qStdOut() << "unable to open location : " << location << "\n" ;
-		qStdOut().flush();
+		qWarning(("unable to open location : " + location + "\n").toAscii() );
 		return;
 	}
 	QStringList list = loc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -63,8 +61,7 @@ void MainWindow::listShowContents(QString location){
 
 	QDir loc(location);
 	if(!loc.exists()){
-		qStdOut() << "unable to open location : " << location << "\n" ;
-		qStdOut().flush();
+		qWarning(("unable to open location : " + location + "\n").toAscii() );
 		return;
 	}
 	QStringList list = loc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -88,8 +85,7 @@ void MainWindow::listSeasonContents(QString location){
 
 	QDir loc(location);
 	if(!loc.exists()){
-		qStdOut() << "unable to open location : " << location << "\n" ;
-		qStdOut().flush();
+		qWarning(("unable to open location : " + location + "\n").toAscii() );
 		return;
 	}
 	QStringList list = loc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -186,7 +182,7 @@ void MainWindow::renameEpisodes(){
 	// loop over the filenames in the episode list - may not be in filesystem listing order
 	// NOTE: we are incrementing TWO variables in here
 	// - currentItem is which row in the list we are on
-	// - episodeNumber is the number for the current file
+	// - episodeNumber is the episode number for the current file - starting at some number
 	int numItems = episodeList->count();
 	int currentItem = 0;
 	while(currentItem<numItems){
@@ -196,8 +192,8 @@ void MainWindow::renameEpisodes(){
 		while(episodeString.length()<episodeNumberLength) episodeString = "0"+episodeString;
 
 		// does as the variable names suggest
-		QFileInfo file(seasonPath+"/"+episodeList->item(currentItem)->text());
-		QString fileExtension = file.fileName().right(file.fileName().length() - file.baseName().length());       // filetype is to the right of the base name
+		QFileInfo info(seasonPath+"/"+episodeList->item(currentItem)->text());
+		QString fileExtension = info.fileName().right(info.fileName().length() - info.baseName().length()); // filetype is to the right of the base name
 
 		QString oldName = episodeList->item(currentItem)->text();
 		QString newName = showName+".s"+seasonString+"e"+episodeString+fileExtension; // formated as per user settings
@@ -209,6 +205,8 @@ void MainWindow::renameEpisodes(){
 		currentItem++;
 		episodeNumber++;
 	}
+
+	listSeasonContents(seasonPath);
 }
 
 void MainWindow::addSeasonPressed(){
@@ -251,58 +249,6 @@ void MainWindow::addSeasonPressed(){
 	moveFilesToFolder(paths,importLocation+"/"+showName+"/"+newFolder);
 	listShowContents(importLocation+"/"+showName);
 }
-void MainWindow::changeEpisodeOrderPressed(){
-	QList<QListWidgetItem*> items = episodeList->selectedItems();
-	QList<int> itemRows;
-	if(items.length()==0) return;
-	for(int x=0; x<items.length(); x++){
-		itemRows.push_back(episodeList->row(items[x]));
-	}
-	qSort(itemRows); // make sure it is sorted even though it "should" be
-
-	QObject *sender = QObject::sender();
-	if(sender == overrideSettingsWidgets.moveEpisode_Up_button){
-		//remove items that can't move up aka like rows 0,1,2,3,4 or just 0
-		// so if 0,1,5,6 -> we get 5,6 out
-		for(int x=0; itemRows.length()>0 && x==itemRows[0]; x++)
-			itemRows.pop_front();
-		if(itemRows.length() == 0) return;
-
-		//now go in forward order, swapping rows
-		for(int x=0; x<itemRows.length(); x++){
-			QListWidgetItem *temp1,*temp2;
-			temp1=episodeList->takeItem(itemRows[x]);
-			temp2=episodeList->takeItem(itemRows[x]-1);
-			episodeList->insertItem(itemRows[x]-1,temp1);
-			episodeList->insertItem(itemRows[x]  ,temp2);
-			temp1->setSelected(true); // to keep the selected entries selected after moving
-		}
-	}
-	if(sender == overrideSettingsWidgets.moveEpisode_Ignore_button){
-		//now go in reverse order, deleting entries
-		for(int x=itemRows.length()-1; x>=0; x--){
-			delete episodeList->takeItem(itemRows[x]);
-		}
-	}
-	if(sender == overrideSettingsWidgets.moveEpisode_Down_button){
-		//remove items that can't move up down past the end of the list
-		// so if 7 items total and indicies 0,1,5,6 -> we get 0,1 out
-		for(int x=episodeList->count()-1; itemRows.length()>0 && x==itemRows[itemRows.length()-1]; x--)
-			itemRows.pop_back();
-		if(itemRows.length() == 0) return;
-
-		//now go in reverse order, swapping rows
-		for(int x=itemRows.length()-1; x>=0; x--){
-			QListWidgetItem *temp1,*temp2;
-			temp2=episodeList->takeItem(itemRows[x]+1);
-			temp1=episodeList->takeItem(itemRows[x]);
-			episodeList->insertItem(itemRows[x]  ,temp2);
-			episodeList->insertItem(itemRows[x]+1,temp1);
-			temp1->setSelected(true); // to keep the selected entries selected after moving
-		}
-	}
-}
-
 void MainWindow::generalMoveFilesPressed(){
 	//first lets find out who made the event
 	QObject *sender = QObject::sender();
@@ -356,6 +302,75 @@ void MainWindow::generalMoveFilesPressed(){
 		int currentRow = showList->currentRow();
 		listShows(importLocation);
 		showList->setCurrentRow(currentRow%showList->count());
+	}
+}
+void MainWindow::moveShowToLibraryPressed(){
+	//TODO - make this work across different partitions and mounted volumes
+	//rename operations only work on same volumes
+	//will have to copy and delete orig to get move behavior
+	//maybe subclass QFile and do some read, some write between the two locations so i can emit progress?
+	if(showList->currentItem() == NULL) return;
+	QString showName = showList->currentItem()->text();
+	bool ok =
+	renameFileOrFolder(importLocation+"/"+showName ,
+					   libraryLocation+"/"+showName
+					   );
+	listShows(importLocation);
+
+	if(!ok){
+		qWarning( ("Unable to move show : "+showName+"\n").toAscii() );
+	}
+}
+
+void MainWindow::changeEpisodeOrderPressed(){
+	QList<QListWidgetItem*> items = episodeList->selectedItems();
+	QList<int> itemRows;
+	if(items.length()==0) return;
+	for(int x=0; x<items.length(); x++){
+		itemRows.push_back(episodeList->row(items[x]));
+	}
+	qSort(itemRows); // make sure it is sorted even though it "should" be
+
+	QObject *sender = QObject::sender();
+	if(sender == overrideSettingsWidgets.moveEpisode_Up_button){
+		//remove items that can't move up aka like rows 0,1,2,3,4 or just 0
+		// so if 0,1,5,6 -> we get 5,6 out
+		for(int x=0; itemRows.length()>0 && x==itemRows[0]; x++)
+			itemRows.pop_front();
+		if(itemRows.length() == 0) return;
+
+		//now go in forward order, swapping rows
+		for(int x=0; x<itemRows.length(); x++){
+			QListWidgetItem *temp1,*temp2;
+			temp1=episodeList->takeItem(itemRows[x]);
+			temp2=episodeList->takeItem(itemRows[x]-1);
+			episodeList->insertItem(itemRows[x]-1,temp1);
+			episodeList->insertItem(itemRows[x]  ,temp2);
+			temp1->setSelected(true); // to keep the selected entries selected after moving
+		}
+	}
+	if(sender == overrideSettingsWidgets.moveEpisode_Ignore_button){
+		//now go in reverse order, deleting entries
+		for(int x=itemRows.length()-1; x>=0; x--){
+			delete episodeList->takeItem(itemRows[x]);
+		}
+	}
+	if(sender == overrideSettingsWidgets.moveEpisode_Down_button){
+		//remove items that can't move up down past the end of the list
+		// so if 7 items total and indicies 0,1,5,6 -> we get 0,1 out
+		for(int x=episodeList->count()-1; itemRows.length()>0 && x==itemRows[itemRows.length()-1]; x--)
+			itemRows.pop_back();
+		if(itemRows.length() == 0) return;
+
+		//now go in reverse order, swapping rows
+		for(int x=itemRows.length()-1; x>=0; x--){
+			QListWidgetItem *temp1,*temp2;
+			temp2=episodeList->takeItem(itemRows[x]+1);
+			temp1=episodeList->takeItem(itemRows[x]);
+			episodeList->insertItem(itemRows[x]  ,temp2);
+			episodeList->insertItem(itemRows[x]+1,temp1);
+			temp1->setSelected(true); // to keep the selected entries selected after moving
+		}
 	}
 }
 
@@ -492,6 +507,7 @@ void MainWindow::createConnections(){
 	connect(overrideSettingsWidgets.moveEpisode_Down_button,SIGNAL(clicked(bool)),this,SLOT(changeEpisodeOrderPressed()) );
 
 	connect(renameSeasonButton,SIGNAL(clicked(bool)),this,SLOT(renameEpisodes()) );
+	connect(moveShowToLibraryButton,SIGNAL(clicked(bool)),this,SLOT(moveShowToLibraryPressed()) );
 }
 
 void MainWindow::loadConfig(){
@@ -501,6 +517,9 @@ void MainWindow::loadConfig(){
 	GlopConfig::Settings s = GlopConfig::ParseFile( (QDir::homePath()+"/.config/glop_conf/simplifiedVideoLibraryRenamer.conf").toStdString() );
 	importLocation = QString::fromStdString(s.values["import location"]);
 	libraryLocation = QString::fromStdString(s.values["library location"]);
+	// TODO - OPEN SETTINGS WINDOW
+	importLocation = QFileInfo(importLocation).absoluteFilePath();
+	libraryLocation = QFileInfo(libraryLocation).absoluteFilePath();
 
 	QString temp = QString::fromStdString(s.values["season number length"]);
 	bool ok;
@@ -525,38 +544,43 @@ void MainWindow::saveConfig(){
 	GlopConfig::SaveToFile((QDir::homePath()+"/.config/glop_conf/simplifiedVideoLibraryRenamer.conf").toStdString() , s);
 }
 
-void MainWindow::renameFileOrFolder(QString oldName, QString newName){
+bool MainWindow::renameFileOrFolder(QString oldName, QString newName){
+	bool ok;
 	QFileInfo source(oldName);
 	QFileInfo dest(newName);
 	if(source.isDir()){
 		if(!dest.exists())
-			QDir().rename(oldName,newName);
+			ok = QDir().rename(oldName,newName);
 		else{
+			ok = true;
 			//merge the folders
 			QDir sd(oldName); // source directory
 			QStringList list = sd.entryList(QDir::NoDotAndDotDot|QDir::Files|QDir::Dirs);
 			for(int x=0; x<list.length(); x++){
-				sd.rename(oldName+"/"+list[x],newName+"/"+list[x]); // move the files into the new folder
+				ok = ok && sd.rename(oldName+"/"+list[x],newName+"/"+list[x]); // move the files into the new folder
 			}
 			sd.rmdir(oldName); // safely fails if not empty
 		}
 	}else{
 		if(!dest.exists())
-			QFile::rename(oldName,newName);
+			ok = QFile::rename(oldName,newName);
 		//else do nothing
 	}
+	return ok;
 }
 
-void MainWindow::moveFilesToFolder(QStringList files, QString folder){
+bool MainWindow::moveFilesToFolder(QStringList files, QString folder){
 	// NOTE: also can pass in folders to the file-list
 	QFileInfo destFolder(folder);
+	bool ok = true;
 	if(!destFolder.exists()){
 		QDir().mkpath(folder); // make the folder
 	}else if(destFolder.isFile())
-		return; // cant move files into a file :P
+		return false; // cant move files into a file :P
 
 	for(int x=0; x<files.length(); x++){
 		QFileInfo source(files[x]);
-		renameFileOrFolder(files[x],folder+"/"+source.fileName()); // move the file to the new location - does merge folders
+		ok = ok && renameFileOrFolder(files[x],folder+"/"+source.fileName()); // move the file to the new location - does merge folders
 	}
+	return ok;
 }
