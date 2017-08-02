@@ -14,16 +14,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 	createLayouts();
 	createWidgets();
 	createConnections();
-
-	GlopConfig::Settings s = GlopConfig::ParseFile("settings.conf");
-	importLocation = QString::fromStdString(s.values["import location"]);
-	libraryLocation = QString::fromStdString(s.values["library location"]);
+	loadConfig();
 
 	listShows(importLocation);
 }
 
 MainWindow::~MainWindow(){
 	// screw deleting all the widgets, they are deleted automatically for us
+
+	saveConfig();
 }
 
 //========================================================================================================================================================================================
@@ -171,6 +170,45 @@ void MainWindow::renameSeason(){
 
 	listShowContents(importLocation+"/"+showList->currentItem()->text());
 	seasonList->setCurrentRow(currentIndex%seasonList->count()); // ensure that one of the items in the list is counted as activated
+}
+void MainWindow::renameEpisodes(){
+	//Sorry for the mess in here, but it is dense and terse
+	//it is easy to understand if you take a minute of two and read it twice
+
+	if(showList->currentItem() == NULL) return;
+	if(seasonList->currentItem() == NULL) return;
+	// first some basic information that takes nearly no processing
+	QString showName = overrideSettingsWidgets.showNameEdit->text();
+	int seasonNumber = overrideSettingsWidgets.seasonNumberEdit->value();
+	int episodeNumber = overrideSettingsWidgets.episodeStartingNumberEdit->value();
+	QString seasonPath = importLocation+"/"+showList->currentItem()->text()+"/"+seasonList->currentItem()->text();
+
+	// loop over the filenames in the episode list - may not be in filesystem listing order
+	// NOTE: we are incrementing TWO variables in here
+	// - currentItem is which row in the list we are on
+	// - episodeNumber is the number for the current file
+	int numItems = episodeList->count();
+	int currentItem = 0;
+	while(currentItem<numItems){
+		QString seasonString = QString::number(seasonNumber);
+		while(seasonString.length()<seasonNumberLength) seasonString = "0"+seasonString;  // make it long enough as per our settings
+		QString episodeString = QString::number(episodeNumber);
+		while(episodeString.length()<episodeNumberLength) episodeString = "0"+episodeString;
+
+		// does as the variable names suggest
+		QFileInfo file(seasonPath+"/"+episodeList->item(currentItem)->text());
+		QString fileExtension = file.fileName().right(file.fileName().length() - file.baseName().length());       // filetype is to the right of the base name
+
+		QString oldName = episodeList->item(currentItem)->text();
+		QString newName = showName+".s"+seasonString+"e"+episodeString+fileExtension; // formated as per user settings
+
+		renameFileOrFolder(seasonPath+"/"+oldName,seasonPath+"/"+newName);
+		//qStdOut() << seasonPath+"/"+oldName+"\n" << seasonPath+"/"+newName+"\n";
+		//qStdOut().flush();
+
+		currentItem++;
+		episodeNumber++;
+	}
 }
 
 void MainWindow::addSeasonPressed(){
@@ -452,6 +490,39 @@ void MainWindow::createConnections(){
 	connect(overrideSettingsWidgets.moveEpisode_Up_button,SIGNAL(clicked(bool)),this,SLOT(changeEpisodeOrderPressed()) );
 	connect(overrideSettingsWidgets.moveEpisode_Ignore_button,SIGNAL(clicked(bool)),this,SLOT(changeEpisodeOrderPressed()) );
 	connect(overrideSettingsWidgets.moveEpisode_Down_button,SIGNAL(clicked(bool)),this,SLOT(changeEpisodeOrderPressed()) );
+
+	connect(renameSeasonButton,SIGNAL(clicked(bool)),this,SLOT(renameEpisodes()) );
+}
+
+void MainWindow::loadConfig(){
+	QDir configLocation(QDir::homePath()+"/.config/glop_conf");
+	if(!configLocation.exists())
+		configLocation.mkpath(QDir::homePath()+"/.config/glop_conf");
+	GlopConfig::Settings s = GlopConfig::ParseFile( (QDir::homePath()+"/.config/glop_conf/simplifiedVideoLibraryRenamer.conf").toStdString() );
+	importLocation = QString::fromStdString(s.values["import location"]);
+	libraryLocation = QString::fromStdString(s.values["library location"]);
+
+	QString temp = QString::fromStdString(s.values["season number length"]);
+	bool ok;
+	seasonNumberLength = temp.toInt(&ok);
+	if(!ok) seasonNumberLength = 5;
+
+	temp = QString::fromStdString(s.values["episode number length"]);
+	episodeNumberLength = temp.toInt(&ok);
+	if(!ok) episodeNumberLength = 5;
+}
+void MainWindow::saveConfig(){
+	QDir configLocation(QDir::homePath()+"/.config/glop_conf");
+	if(!configLocation.exists())
+		configLocation.mkpath(QDir::homePath()+"/.config/glop_conf");
+	GlopConfig::Settings s ;
+
+	s.values["import location"] = importLocation.toStdString();
+	s.values["library location"] = libraryLocation.toStdString();
+	s.values["season number length"] = QString::number(seasonNumberLength).toStdString();
+	s.values["episode number length"] = QString::number(episodeNumberLength).toStdString();
+
+	GlopConfig::SaveToFile((QDir::homePath()+"/.config/glop_conf/simplifiedVideoLibraryRenamer.conf").toStdString() , s);
 }
 
 void MainWindow::renameFileOrFolder(QString oldName, QString newName){

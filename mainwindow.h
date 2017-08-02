@@ -37,6 +37,8 @@ public:
 	void createLayouts(); // creates the layouts to put the widgets into
 	void createWidgets(); // handles setting up the widgets into the layouts
 	void createConnections(); //connects the slots and signals needed
+	void loadConfig();
+	void saveConfig();
 
 	void listShows(QString location);
 	void listShowContents(QString location);
@@ -47,8 +49,10 @@ public slots:
 	void showListClicked(QListWidgetItem * current);
 	void seasonListClicked(QListWidgetItem * current);
 
-	void renameShow();	// called when the rename buttons are pressed
-	void renameSeason();
+	// called when the rename buttons are pressed
+	void renameShow();
+	void renameSeason(); // not to be confused with the button with the same text
+	void renameEpisodes();
 
 	void addSeasonPressed(); // move files into a folder for a season
 	void changeEpisodeOrderPressed(); // called by Move Up/Down buttons - ALSO IGNORE BUTTON
@@ -90,6 +94,8 @@ private: // widgets
 private: // state variables
 	QString importLocation; // the folder that we have the lists show and we manipulate
 	QString libraryLocation; // where we copy/move shows into from the import location
+	int seasonNumberLength; // how many digits will the season number be padded out to
+	int episodeNumberLength; // same as season
 
 private:
 	void renameFileOrFolder(QString oldName,QString newName); // trys to rename, also if is a folder, will try merging if already folder there
