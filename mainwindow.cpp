@@ -136,6 +136,9 @@ void MainWindow::seasonListClicked(QListWidgetItem *current){
 		int seasonNumber = parts[1].toInt(); // assume the second entry is the number
 		overrideSettingsWidgets.seasonNumberEdit->setValue(seasonNumber); // set it without bothering if was a valid conversion - returns 0 if it failed which is fine
 	}
+
+	//reset the episode start to 1
+	overrideSettingsWidgets.episodeStartingNumberEdit->setValue(1);
 }
 
 void MainWindow::renameShow(){
@@ -153,7 +156,6 @@ void MainWindow::renameShow(){
 	listShows(importLocation);
 	showList->setCurrentRow(currentIndex%showList->count()); // ensure that one of the items in the list is counted as activated
 }
-
 void MainWindow::renameSeason(){
 	if(showList->currentItem() == NULL) return;
 	if(seasonList->currentItem() == NULL) return;
@@ -210,6 +212,57 @@ void MainWindow::addSeasonPressed(){
 	}
 	moveFilesToFolder(paths,importLocation+"/"+showName+"/"+newFolder);
 	listShowContents(importLocation+"/"+showName);
+}
+void MainWindow::changeEpisodeOrderPressed(){
+	QList<QListWidgetItem*> items = episodeList->selectedItems();
+	QList<int> itemRows;
+	if(items.length()==0) return;
+	for(int x=0; x<items.length(); x++){
+		itemRows.push_back(episodeList->row(items[x]));
+	}
+	qSort(itemRows); // make sure it is sorted even though it "should" be
+
+	QObject *sender = QObject::sender();
+	if(sender == overrideSettingsWidgets.moveEpisode_Up_button){
+		//remove items that can't move up aka like rows 0,1,2,3,4 or just 0
+		// so if 0,1,5,6 -> we get 5,6 out
+		for(int x=0; itemRows.length()>0 && x==itemRows[0]; x++)
+			itemRows.pop_front();
+		if(itemRows.length() == 0) return;
+
+		//now go in forward order, swapping rows
+		for(int x=0; x<itemRows.length(); x++){
+			QListWidgetItem *temp1,*temp2;
+			temp1=episodeList->takeItem(itemRows[x]);
+			temp2=episodeList->takeItem(itemRows[x]-1);
+			episodeList->insertItem(itemRows[x]-1,temp1);
+			episodeList->insertItem(itemRows[x]  ,temp2);
+			temp1->setSelected(true); // to keep the selected entries selected after moving
+		}
+	}
+	if(sender == overrideSettingsWidgets.moveEpisode_Ignore_button){
+		//now go in reverse order, deleting entries
+		for(int x=itemRows.length()-1; x>=0; x--){
+			delete episodeList->takeItem(itemRows[x]);
+		}
+	}
+	if(sender == overrideSettingsWidgets.moveEpisode_Down_button){
+		//remove items that can't move up down past the end of the list
+		// so if 7 items total and indicies 0,1,5,6 -> we get 0,1 out
+		for(int x=episodeList->count()-1; itemRows.length()>0 && x==itemRows[itemRows.length()-1]; x--)
+			itemRows.pop_back();
+		if(itemRows.length() == 0) return;
+
+		//now go in reverse order, swapping rows
+		for(int x=itemRows.length()-1; x>=0; x--){
+			QListWidgetItem *temp1,*temp2;
+			temp2=episodeList->takeItem(itemRows[x]+1);
+			temp1=episodeList->takeItem(itemRows[x]);
+			episodeList->insertItem(itemRows[x]  ,temp2);
+			episodeList->insertItem(itemRows[x]+1,temp1);
+			temp1->setSelected(true); // to keep the selected entries selected after moving
+		}
+	}
 }
 
 void MainWindow::generalMoveFilesPressed(){
@@ -395,6 +448,10 @@ void MainWindow::createConnections(){
 	connect(belowListWidgets.moveToSeasonListButton,SIGNAL(clicked(bool)),this,SLOT(generalMoveFilesPressed()) );
 	connect(belowListWidgets.moveToShowListButton,SIGNAL(clicked(bool)),this,SLOT(generalMoveFilesPressed()) );
 	connect(belowListWidgets.addToShowButton,SIGNAL(clicked(bool)),this,SLOT(generalMoveFilesPressed()) );
+
+	connect(overrideSettingsWidgets.moveEpisode_Up_button,SIGNAL(clicked(bool)),this,SLOT(changeEpisodeOrderPressed()) );
+	connect(overrideSettingsWidgets.moveEpisode_Ignore_button,SIGNAL(clicked(bool)),this,SLOT(changeEpisodeOrderPressed()) );
+	connect(overrideSettingsWidgets.moveEpisode_Down_button,SIGNAL(clicked(bool)),this,SLOT(changeEpisodeOrderPressed()) );
 }
 
 void MainWindow::renameFileOrFolder(QString oldName, QString newName){

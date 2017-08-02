@@ -51,6 +51,7 @@ public slots:
 	void renameSeason();
 
 	void addSeasonPressed(); // move files into a folder for a season
+	void changeEpisodeOrderPressed(); // called by Move Up/Down buttons - ALSO IGNORE BUTTON
 
 	void generalMoveFilesPressed(); // moveLeft and addToShow
 
