@@ -50,7 +50,9 @@ public slots:
 	void renameShow();	// called when the rename buttons are pressed
 	void renameSeason();
 
-	void addSeasonPressed();
+	void addSeasonPressed(); // move files into a folder for a season
+
+	void generalMoveFilesPressed(); // moveLeft and addToShow
 
 private: // widgets
 	QGridLayout* mainLayout; // counting from 1 and up for rows and columns
@@ -61,7 +63,8 @@ private: // widgets
 
 	struct{
 		QLineEdit *showNameEntry,*seasonNameEntry;
-		QPushButton *showRenameButton,*seasonRenameButton,*moveToSeasonButton;
+		QPushButton *showRenameButton,*seasonRenameButton;
+		QPushButton *addToShowButton,*moveToShowListButton,*moveToSeasonListButton;
 	}belowListWidgets;
 
 	QPushButton *settingsButton;
@@ -88,7 +91,7 @@ private: // state variables
 	QString libraryLocation; // where we copy/move shows into from the import location
 
 private:
-	void renameFileOrFolder(QString oldName,QString newName); // trys to rename, but if is a folder, will try merging also
+	void renameFileOrFolder(QString oldName,QString newName); // trys to rename, also if is a folder, will try merging if already folder there
 	void moveFilesToFolder(QStringList files,QString folder); // NOTE: also can pass in folders to the file-list
 };
 

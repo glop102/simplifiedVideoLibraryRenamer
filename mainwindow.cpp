@@ -196,13 +196,13 @@ void MainWindow::addSeasonPressed(){
 		newFolder = "Extra";
 
 	if(newFolder.length() == 0){
-		qWarning("addSeasonPressed() : unknown and unhandeled callback to here\nDid you forget to add something?\n");
+		qWarning("warning : addSeasonPressed() : unknown and unhandeled callback to here\nDid you forget to add something?\n");
 		return;
 	}
 
 	//Now we get a list of filenames from the season list that are to be moved
 	QList<QListWidgetItem*> names = seasonList->selectedItems();
-	QStringList paths;
+	QStringList paths; // paths to files to move
 	QString showName = showList->currentItem()->text();
 	if(names.length()==0) return; // dont make empty folders
 	for(int x=0; x<names.length(); x++){
@@ -210,6 +210,62 @@ void MainWindow::addSeasonPressed(){
 	}
 	moveFilesToFolder(paths,importLocation+"/"+showName+"/"+newFolder);
 	listShowContents(importLocation+"/"+showName);
+}
+
+void MainWindow::generalMoveFilesPressed(){
+	//first lets find out who made the event
+	QObject *sender = QObject::sender();
+
+	//Now figure out what to do
+	if(sender == belowListWidgets.moveToSeasonListButton){ // move episodes up to adjacent of season folders
+		if(showList->currentItem() == NULL) return;
+		if(seasonList->currentItem() == NULL) return;
+		QList<QListWidgetItem*> names = episodeList->selectedItems();
+		QStringList paths; // paths to files to move
+		QString showName = showList->currentItem()->text();
+		QString seasonName = seasonList->currentItem()->text();
+		if(names.length()==0) return; // nothing to move
+		for(int x=0; x<names.length(); x++){
+			paths.push_back(importLocation+"/"+showName+"/"+seasonName+"/"+names[x]->text());
+		}
+		moveFilesToFolder(paths,importLocation+"/"+showName);
+		QDir().rmdir(importLocation+"/"+showName+"/"+seasonName); // try to delete folder - only succeds if empty
+
+		int currentRow = seasonList->currentRow();
+		listShowContents(importLocation+"/"+showName);
+		seasonList->setCurrentRow(currentRow%seasonList->count()); // have it list the same season if it still exists
+	}
+	if(sender == belowListWidgets.moveToShowListButton){ // move seasons up to adjacent of show folders
+		if(showList->currentItem() == NULL) return;
+		QList<QListWidgetItem*> names = seasonList->selectedItems();
+		QStringList paths; // paths to files to move
+		QString showName = showList->currentItem()->text();
+		if(names.length()==0) return; // nothing to move
+		for(int x=0; x<names.length(); x++){
+			paths.push_back(importLocation+"/"+showName+"/"+names[x]->text());
+		}
+		moveFilesToFolder(paths,importLocation);
+		QDir().rmdir(importLocation+"/"+showName); // try to delete folder - only succeds if empty
+
+		int currentRow = showList->currentRow();
+		listShows(importLocation);
+		showList->setCurrentRow(currentRow%showList->count());
+	}
+	if(sender == belowListWidgets.addToShowButton){ // move seasons up to adjacent of show folders
+		if(showList->currentItem() == NULL) return;
+		QList<QListWidgetItem*> names = showList->selectedItems();
+		QStringList paths; // paths to files to move
+		QString newFolder = belowListWidgets.showNameEntry->text();
+		if(names.length()==0) return; // nothing to move
+		for(int x=0; x<names.length(); x++){
+			paths.push_back(importLocation+"/"+names[x]->text());
+		}
+		moveFilesToFolder(paths,importLocation+"/"+newFolder);
+
+		int currentRow = showList->currentRow();
+		listShows(importLocation);
+		showList->setCurrentRow(currentRow%showList->count());
+	}
 }
 
 //========================================================================================================================================================================================
@@ -299,7 +355,9 @@ void MainWindow::createWidgets(){
 	belowListWidgets.showRenameButton = new QPushButton("Rename");
 	belowListWidgets.seasonNameEntry = new QLineEdit();
 	belowListWidgets.seasonRenameButton = new QPushButton("Rename");
-	belowListWidgets.moveToSeasonButton = new QPushButton("Move Left");
+	belowListWidgets.addToShowButton = new QPushButton("Add To Folder");
+	belowListWidgets.moveToShowListButton = new QPushButton("Move Left");
+	belowListWidgets.moveToSeasonListButton = new QPushButton("Move Left");
 
 	renameSeasonButton = new QPushButton("Rename Season");
 	moveShowToLibraryButton = new QPushButton("Move To Library");
@@ -308,7 +366,9 @@ void MainWindow::createWidgets(){
 	mainLayout->addWidget(belowListWidgets.showRenameButton,4,1);
 	mainLayout->addWidget(belowListWidgets.seasonNameEntry,3,2);
 	mainLayout->addWidget(belowListWidgets.seasonRenameButton,4,2);
-	mainLayout->addWidget(belowListWidgets.moveToSeasonButton,3,3);
+	mainLayout->addWidget(belowListWidgets.addToShowButton,5,1);
+	mainLayout->addWidget(belowListWidgets.moveToShowListButton,5,2);
+	mainLayout->addWidget(belowListWidgets.moveToSeasonListButton,5,3);
 
 	mainLayout->addWidget(renameSeasonButton,3,4);
 	mainLayout->addWidget(moveShowToLibraryButton,4,4);
@@ -331,6 +391,10 @@ void MainWindow::createConnections(){
 	connect(seasonButtonWidgets.season4Button,SIGNAL(clicked(bool)),this,SLOT(addSeasonPressed()) );
 	connect(seasonButtonWidgets.season5Button,SIGNAL(clicked(bool)),this,SLOT(addSeasonPressed()) );
 	connect(seasonButtonWidgets.seasonOtherButton,SIGNAL(clicked(bool)),this,SLOT(addSeasonPressed()) );
+
+	connect(belowListWidgets.moveToSeasonListButton,SIGNAL(clicked(bool)),this,SLOT(generalMoveFilesPressed()) );
+	connect(belowListWidgets.moveToShowListButton,SIGNAL(clicked(bool)),this,SLOT(generalMoveFilesPressed()) );
+	connect(belowListWidgets.addToShowButton,SIGNAL(clicked(bool)),this,SLOT(generalMoveFilesPressed()) );
 }
 
 void MainWindow::renameFileOrFolder(QString oldName, QString newName){
@@ -356,6 +420,7 @@ void MainWindow::renameFileOrFolder(QString oldName, QString newName){
 }
 
 void MainWindow::moveFilesToFolder(QStringList files, QString folder){
+	// NOTE: also can pass in folders to the file-list
 	QFileInfo destFolder(folder);
 	if(!destFolder.exists()){
 		QDir().mkpath(folder); // make the folder
