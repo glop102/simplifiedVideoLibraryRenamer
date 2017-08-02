@@ -12,16 +12,16 @@ After downloading a show from various sources, the files typically will have odd
 * Even Faster Highlight by dragging the mouse over several entries
 
 * Left List - Tv Shows
-** Rename uses the entry box to give the new name to the last highlighted item
-** Add To Folder makes a new folder with the name given and moves selected items into that folder
-** Rename can merge folders if you tell it the name of folder already there
+* * Rename uses the entry box to give the new name to the last highlighted item
+* * Add To Folder makes a new folder with the name given and moves selected items into that folder
+* * Rename can merge folders if you tell it the name of folder already there
 * Middle List - Seasons
-** Highlight the comon items that go in the same season
-** Use the buttons below to put them in a folder (eg "Season 1")
+* * Highlight the comon items that go in the same season
+* * Use the buttons below to put them in a folder (eg "Season 1")
 * Right List - Episodes
-** Highlight items that are not in proper order (Top being lowest number)
-** Use the buttons to the right (Move Up/Down) to change their order
-** The settings on the right are used for renaming and numbering
+* * Highlight items that are not in proper order (Top being lowest number)
+* * Use the buttons to the right (Move Up/Down) to change their order
+* * The settings on the right are used for renaming and numbering
 * Bottom Right Corner
-** Rename Season will rename all files in the current season (eg "Show Name.s01.e01.mkv")
-** Move To Library will move the current Show to the designated library location
+* * Rename Season will rename all files in the current season (eg "Show Name.s01.e01.mkv")
+* * Move To Library will move the current Show to the designated library location
