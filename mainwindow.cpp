@@ -193,7 +193,8 @@ void MainWindow::renameEpisodes(){
 
 		// does as the variable names suggest
 		QFileInfo info(seasonPath+"/"+episodeList->item(currentItem)->text());
-		QString fileExtension = info.fileName().right(info.fileName().length() - info.baseName().length()); // filetype is to the right of the base name
+		QString filename;
+		QString fileExtension = info.fileName().right(info.fileName().length() - info.fileName().lastIndexOf(".")); // filetype is to the right of the base name
 
 		QString oldName = episodeList->item(currentItem)->text();
 		QString newName = showName+".s"+seasonString+"e"+episodeString+fileExtension; // formated as per user settings
