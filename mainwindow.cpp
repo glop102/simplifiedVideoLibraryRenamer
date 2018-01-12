@@ -36,7 +36,7 @@ void MainWindow::listShows(QString location){
 
 	QDir loc(location);
 	if(!loc.exists()){
-		qWarning(("unable to open location : " + location + "\n").toAscii() );
+		printf("%s", ("unable to open location : " + location + "\n").toStdString().c_str() );
 		return;
 	}
 	QStringList list = loc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -61,7 +61,7 @@ void MainWindow::listShowContents(QString location){
 
 	QDir loc(location);
 	if(!loc.exists()){
-		qWarning(("unable to open location : " + location + "\n").toAscii() );
+		printf("%s",("unable to open location : " + location + "\n").toStdString().c_str() );
 		return;
 	}
 	QStringList list = loc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -85,7 +85,7 @@ void MainWindow::listSeasonContents(QString location){
 
 	QDir loc(location);
 	if(!loc.exists()){
-		qWarning(("unable to open location : " + location + "\n").toAscii() );
+		printf("%s",("unable to open location : " + location + "\n").toStdString().c_str() );
 		return;
 	}
 	QStringList list = loc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -319,7 +319,7 @@ void MainWindow::moveShowToLibraryPressed(){
 	listShows(importLocation);
 
 	if(!ok){
-		qWarning( ("Unable to move show : "+showName+"\n").toAscii() );
+		printf("%s", ("Unable to move show : "+showName+"\n").toStdString().c_str() );
 	}
 }
 

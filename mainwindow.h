@@ -16,6 +16,7 @@
 #include <QBrush>
 #include <QColor>
 #include <QFileInfo>
+#include <string>
 
 #include "glopConfig.h"
 #include "settingsdialog.h"
