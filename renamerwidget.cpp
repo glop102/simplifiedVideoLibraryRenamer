@@ -123,14 +123,15 @@ void RenamerWidget::listSeasonContents()
 
 	// We use the basename as the key and the extension added to the QStringList
 	QMap<QString,QStringList> episodeFilenames;
+	bool autoDeleteEnabled = (*settingsDialog)["auto delete enable"] == "true";
+	QStringList autoDeleteFilenames = (*settingsDialog)["auto delete filenames"].split(";",Qt::SkipEmptyParts);
 	list = loc.entryList(QDir::Files);
 	for(int x=0; x<list.length(); x++){
 		QFileInfo file(list[x]);
-		if(list[x] == "RARBG.txt"){
+		if(autoDeleteEnabled && autoDeleteFilenames.contains(list[x]) )
 			QFile::remove(list[x]);
-			continue;
-		}
-		episodeFilenames[file.completeBaseName()].push_back(file.suffix());
+		else
+			episodeFilenames[file.completeBaseName()].push_back(file.suffix());
 	}
 	for(QString baseName : episodeFilenames.keys()){
 		QString listing;

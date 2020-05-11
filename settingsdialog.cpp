@@ -20,6 +20,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
 	connect( ui->bConfirm,SIGNAL(clicked()), this,SLOT(accept()) );
 	connect( ui->bCancel,SIGNAL(clicked()), this,SLOT(reject()) );
+
+	connect( ui->bAutoDeleteAddNew,SIGNAL(clicked()), this,SLOT(modifyAutoDeleteFilenames()) );
+	connect( ui->bAutoDeleteRemoveSelection,SIGNAL(clicked()), this,SLOT(modifyAutoDeleteFilenames()) );
 }
 
 QString SettingsDialog::operator[](QString key)
@@ -52,6 +55,18 @@ void SettingsDialog::open()
 				);
 
 	updateExampleRename();
+
+	if( settings.values["auto delete enable"] == "true" )
+		ui->cAutoDeleteEnable->setChecked(true);
+	else
+		ui->cAutoDeleteEnable->setChecked(false);
+
+	if(settings.values.find("auto delete filenames") == settings.values.end())
+		settings.values["auto delete filenames"] = DEFAULT_DELETE_FILENAMES;
+	QStringList filenames = QString::fromStdString(settings.values["auto delete filenames"]).split(";",Qt::SkipEmptyParts);
+	ui->listAutoDeleteFiles->clear();
+	for(auto name : filenames)
+		ui->listAutoDeleteFiles->addItem(name);
 }
 
 void SettingsDialog::accept()
@@ -65,6 +80,14 @@ void SettingsDialog::accept()
 			ui->eImportLocation->text().toStdString();
 	settings.values["library location"] =
 			ui->eLibraryLocation->text().toStdString();
+	settings.values["auto delete enable"] =
+			ui->cAutoDeleteEnable->isChecked() ? "true" : "false";
+
+	QString filenames;
+	for( int row=0; row<ui->listAutoDeleteFiles->count(); row++)
+		filenames += ui->listAutoDeleteFiles->item(row)->text()+";";
+	settings.values["auto delete filenames"] = filenames.toStdString();
+
 
 	QDir configLocation(QDir::homePath()+"/.config/glop_conf/simplifiedVideoLibraryRenamer.conf");
 	GlopConfig::SaveToFile(configLocation.path().toStdString(),settings);
@@ -96,5 +119,21 @@ void SettingsDialog::openFileDialog(){
 		QString temp = QFileDialog::getExistingDirectory(this,"Select Location",ui->eLibraryLocation->text());
 		if(temp.length()>0) // handle if user hits cancel
 			ui->eLibraryLocation->setText(temp);
+	}
+}
+
+void SettingsDialog::modifyAutoDeleteFilenames()
+{
+	QObject *sender = QObject::sender();
+	if(sender == ui->bAutoDeleteRemoveSelection){
+		delete
+		ui->listAutoDeleteFiles->takeItem(
+					ui->listAutoDeleteFiles->currentRow()
+			);
+	}else if(sender == ui->bAutoDeleteAddNew){
+		QString newFilename = ui->eAutoDeleteNewFilename->text();
+		if(newFilename == "") return;
+		ui->listAutoDeleteFiles->addItem(newFilename);
+		ui->listAutoDeleteFiles->sortItems();
 	}
 }

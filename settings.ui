@@ -13,17 +13,7 @@
   <property name="windowTitle">
    <string>Settings</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="5" column="0" colspan="2">
-    <widget class="QPushButton" name="bBrowseLibrary">
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open a file browser to select your Library location&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string>Library Location (Optional)</string>
-     </property>
-    </widget>
-   </item>
+  <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0,0,0,0,1,0,0,0,0">
    <item row="1" column="1">
     <widget class="QSpinBox" name="eEpisodeLength">
      <property name="toolTip">
@@ -40,6 +30,40 @@
      </property>
     </widget>
    </item>
+   <item row="10" column="1">
+    <widget class="QPushButton" name="bAutoDeleteRemoveSelection">
+     <property name="text">
+      <string>Delete</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Episode Number Length</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QLabel" name="lExampleRename">
+     <property name="text">
+      <string>Example Show Title.s03e005.mkv</string>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="0">
+    <widget class="QPushButton" name="bConfirm">
+     <property name="text">
+      <string>OK</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="0" rowspan="4">
+    <widget class="QListWidget" name="listAutoDeleteFiles"/>
+   </item>
+   <item row="11" column="1">
+    <widget class="QLineEdit" name="eAutoDeleteNewFilename"/>
+   </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
@@ -47,15 +71,25 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="0">
-    <widget class="QPushButton" name="bConfirm">
+   <item row="5" column="0" colspan="2">
+    <widget class="QLineEdit" name="eImportLocation"/>
+   </item>
+   <item row="9" column="0" colspan="2">
+    <widget class="QCheckBox" name="cAutoDeleteEnable">
      <property name="text">
-      <string>OK</string>
+      <string>Auto-Delete Files</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="QLineEdit" name="eLibraryLocation"/>
+   <item row="14" column="1">
+    <widget class="QPushButton" name="bCancel">
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
    </item>
    <item row="1" column="0">
     <widget class="QSpinBox" name="eSeasonLength">
@@ -73,17 +107,42 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
-    <widget class="QPushButton" name="bCancel">
-     <property name="text">
-      <string>Cancel</string>
+   <item row="13" column="1">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="8" column="0" colspan="2">
+    <widget class="Line" name="line">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>1</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QLineEdit" name="eImportLocation"/>
+   <item row="7" column="0" colspan="2">
+    <widget class="QLineEdit" name="eLibraryLocation"/>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="4" column="0" colspan="2">
     <widget class="QPushButton" name="bBrowseImport">
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open a file browser to select your import location&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -93,17 +152,30 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QLabel" name="lExampleRename">
+   <item row="12" column="1">
+    <widget class="QPushButton" name="bAutoDeleteAddNew">
      <property name="text">
-      <string>Example Show Title.s03e005.mkv</string>
+      <string>Add Filename</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="1">
-    <widget class="QLabel" name="label_2">
+   <item row="6" column="0" colspan="2">
+    <widget class="QPushButton" name="bBrowseLibrary">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open a file browser to select your Library location&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
-      <string>Episode Number Length</string>
+      <string>Library Location (Optional)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="Line" name="line_2">
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>

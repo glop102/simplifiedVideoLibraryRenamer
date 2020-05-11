@@ -10,6 +10,8 @@ namespace Ui {
 class Settings;
 }
 
+#define DEFAULT_DELETE_FILENAMES "RARBG.txt;Torrent downloaded from Demonoid.com.txt;RARBG.com.txt;Info.txt;"
+
 class SettingsDialog : public QDialog
 {
 	Q_OBJECT
@@ -25,6 +27,8 @@ public slots:
 	void accept();
 	void updateExampleRename();
 	void openFileDialog();
+
+	void modifyAutoDeleteFilenames();
 private:
 	Ui::Settings *ui;
 };
