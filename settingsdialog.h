@@ -1,41 +1,32 @@
-#ifndef SETTINGSDIALOG_H
-#define SETTINGSDIALOG_H
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
-#include <QWidget>
 #include <QDialog>
-#include <QGridLayout>
-#include <QSpinBox>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QLabel>
-#include <QString>
+#include <QDir>
 #include <QFileDialog>
 #include "glopConfig.h"
 
-class SettingsDialog : public QDialog {
-	Q_OBJECT
-	GlopConfig::Settings newSettings;
-	QGridLayout *layout;
-	QLabel *seasonNumberLengthLabel,*episodeNumberLengthLabel;
-	QSpinBox *seasonNumberLengthEntry,*episodeNumberLengthEntry;
-	QLabel *exampleNamedEpisode;
-	QPushButton *importLocationButton;
-	QLineEdit *importLocationEntry;
-	QPushButton *libraryLocationButton;
-	QLineEdit *libraryLocationEntry;
-	QPushButton *okButton,*cancelButton;
-public:
-	SettingsDialog(GlopConfig::Settings s, QWidget *parent=0);
-	~SettingsDialog();
-	GlopConfig::Settings getSettings();
-public slots:
-	void reject(); // called when the escape key is pressed - inherited from qdialog class
-	void accept();
-	void openFileDialog();
-	void setNamingExample();
+namespace Ui {
+class Settings;
+}
 
+class SettingsDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+	explicit SettingsDialog(QWidget *parent = nullptr);
+	~SettingsDialog();
+
+	GlopConfig::Settings settings;
+	QString operator[](QString);
+public slots:
+	void open();
+	void accept();
+	void updateExampleRename();
+	void openFileDialog();
 private:
-	void createWidgets();
+	Ui::Settings *ui;
 };
 
-#endif // SETTINGSDIALOG_H
+#endif // SETTINGS_H

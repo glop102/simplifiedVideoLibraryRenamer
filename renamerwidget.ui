@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RenamerWidget</class>
+ <widget class="QWidget" name="RenamerWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1423</width>
+    <height>872</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Simplified Video Library Renamer</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout" rowstretch="1,0,0,0,0" columnstretch="1,1,1,0">
+   <item row="1" column="1">
+    <layout class="QGridLayout" name="seasonControls" columnstretch="1,1,1,1,1">
+     <item row="0" column="2">
+      <widget class="QPushButton" name="bSeason3">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Multiple files : Moves them into a folder called Season 3&lt;/p&gt;&lt;p&gt;Single Folder : Renames the folder to Season 3&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>S3</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QPushButton" name="bSeason5">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Multiple files : Moves them into a folder called Season 5&lt;/p&gt;&lt;p&gt;Single Folder : Renames the folder to Season 5&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>S5</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="bSeason0">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Season 0 is for specials or OVAs&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Multiple files : Moves them into a folder called Season 0&lt;/p&gt;&lt;p&gt;Single Folder : Renames the folder to Season 0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>S0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QPushButton" name="bSeason1">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Multiple files : Moves them into a folder called Season 1&lt;/p&gt;&lt;p&gt;Single Folder : Renames the folder to Season 1&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>S1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="bSeason2">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Multiple files : Moves them into a folder called Season 2&lt;/p&gt;&lt;p&gt;Single Folder : Renames the folder to Season 2&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>S2</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" colspan="2">
+      <widget class="QPushButton" name="bSeasonExtra">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Multiple files : Moves them into a folder called Extras&lt;/p&gt;&lt;p&gt;Single Folder : Renames the folder to Extras&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>extra</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QPushButton" name="bSeason4">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Multiple files : Moves them into a folder called Season 4&lt;/p&gt;&lt;p&gt;Single Folder : Renames the folder to Season 4&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>S4</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="2">
+      <widget class="QPushButton" name="bSeasonCustom">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Uses the number from the entry ti the right of this button&lt;/p&gt;&lt;p&gt;Multiple files : Moves them into a folder called Season #&lt;/p&gt;&lt;p&gt;Single Folder : Renames the folder to Season #&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Season</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2" colspan="3">
+      <widget class="QSpinBox" name="eSeasonCustomNumber">
+       <property name="maximum">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3" colspan="2">
+      <widget class="QCheckBox" name="cSeasonMoveOnly">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disables the special case of when you have only highlighted a single directory - It will put the folder in a new folder instead of renaming that selected folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Only Move</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLineEdit" name="eShowFilename"/>
+   </item>
+   <item row="0" column="1">
+    <widget class="QListWidget" name="listSeasons">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" rowspan="2">
+    <widget class="QListWidget" name="listShows">
+     <property name="dragEnabled">
+      <bool>false</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2" rowspan="2">
+    <widget class="QListWidget" name="listEpisodes">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Put the files in the order that you would like them renamed.&lt;/p&gt;&lt;p&gt;The top file will be given the Starting Episode Number&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="bRenameSingleShow">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Renames the currently selected item to what is in the text box right above this button. (Only on item is renamed)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Rename</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QPushButton" name="bShowsMoveRight">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Moves all the selected files above to a folder. The folder name will be whatever is in the text box right above this button&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Add to Folder</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLineEdit" name="eSeasonFilename"/>
+   </item>
+   <item row="3" column="1">
+    <widget class="QPushButton" name="bRenameSingleSeason">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Renames the currently selected item to what is in the text box right above this button. (Only on item is renamed)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Rename</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QPushButton" name="bSeasonsMoveLeft">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Moves the currently selected files up a level, puting them next to the files/folders in the panel to the left&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Move Left</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QPushButton" name="bEpisodesMoveLeft">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Moves the currently selected files up a level, puting them next to the files/folders in the panel to the left&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Move Left</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="3">
+    <widget class="QPushButton" name="bMoveShowLibrary">
+     <property name="text">
+      <string>Move Show to Library</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="3">
+    <widget class="QPushButton" name="bMoveSeasonLibrary">
+     <property name="text">
+      <string>Move Season to Library</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QPushButton" name="bRenameSeasonEpisodes">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Renames all the files in the current episode list (Right Side Panel) using the above Show Information&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Rename Season</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3" rowspan="2">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetDefaultConstraint</enum>
+     </property>
+     <item>
+      <widget class="QPushButton" name="bSettingsWindow">
+       <property name="text">
+        <string>Settings</string>
+       </property>
+      </widget>
+     </item>
+     <item alignment="Qt::AlignLeft|Qt::AlignTop">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Current Show Information</string>
+       </property>
+      </widget>
+     </item>
+     <item alignment="Qt::AlignTop">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Show Name</string>
+       </property>
+      </widget>
+     </item>
+     <item alignment="Qt::AlignTop">
+      <widget class="QLineEdit" name="eParsedShowName"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Season Number</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="eParsedSeasonNumber"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Starting Episode Number</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="eParsedStartingEpisodeNumber"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="bMoveEpisodesUp">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Move the currently selected episodes up the list&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Move Up</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="bIgnoreEpisodes">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remove the selected episodes from the list&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Ignore</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="bMoveEpisodesDown">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Move the selected episodes down&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Move Down</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>listShows</tabstop>
+  <tabstop>listSeasons</tabstop>
+  <tabstop>listEpisodes</tabstop>
+  <tabstop>bSettingsWindow</tabstop>
+  <tabstop>eParsedShowName</tabstop>
+  <tabstop>eParsedSeasonNumber</tabstop>
+  <tabstop>eParsedStartingEpisodeNumber</tabstop>
+  <tabstop>bMoveEpisodesUp</tabstop>
+  <tabstop>bIgnoreEpisodes</tabstop>
+  <tabstop>bMoveEpisodesDown</tabstop>
+  <tabstop>bRenameSeasonEpisodes</tabstop>
+  <tabstop>bMoveSeasonLibrary</tabstop>
+  <tabstop>bMoveShowLibrary</tabstop>
+  <tabstop>eShowFilename</tabstop>
+  <tabstop>bRenameSingleShow</tabstop>
+  <tabstop>bShowsMoveRight</tabstop>
+  <tabstop>eSeasonFilename</tabstop>
+  <tabstop>bRenameSingleSeason</tabstop>
+  <tabstop>bSeasonsMoveLeft</tabstop>
+  <tabstop>bEpisodesMoveLeft</tabstop>
+  <tabstop>bSeason1</tabstop>
+  <tabstop>bSeason2</tabstop>
+  <tabstop>bSeason3</tabstop>
+  <tabstop>bSeason4</tabstop>
+  <tabstop>bSeason5</tabstop>
+  <tabstop>bSeason0</tabstop>
+  <tabstop>bSeasonExtra</tabstop>
+  <tabstop>bSeasonCustom</tabstop>
+  <tabstop>eSeasonCustomNumber</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

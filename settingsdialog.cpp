@@ -1,113 +1,100 @@
 #include "settingsdialog.h"
+#include "ui_settings.h"
 
-SettingsDialog::SettingsDialog(GlopConfig::Settings s, QWidget *parent) : QDialog(parent) {
-	newSettings = s;
-	createWidgets();
-	setNamingExample();
-}
-SettingsDialog::~SettingsDialog(){
+SettingsDialog::SettingsDialog(QWidget *parent) :
+	QDialog(parent),
+	ui(new Ui::Settings)
+{
+	ui->setupUi(this);
+
+	QDir configLocation(QDir::homePath()+"/.config/glop_conf");
+	if(!configLocation.exists())
+		configLocation.mkpath(configLocation.path());
+	settings = GlopConfig::ParseFile( configLocation.filePath("simplifiedVideoLibraryRenamer.conf").toStdString() );
+
+	connect( ui->eSeasonLength,SIGNAL(valueChanged(int)), this,SLOT(updateExampleRename()) );
+	connect( ui->eEpisodeLength,SIGNAL(valueChanged(int)), this,SLOT(updateExampleRename()) );
+
+	connect( ui->bBrowseImport,SIGNAL(clicked()), this,SLOT(openFileDialog()) );
+	connect( ui->bBrowseLibrary,SIGNAL(clicked()), this,SLOT(openFileDialog()) );
+
+	connect( ui->bConfirm,SIGNAL(clicked()), this,SLOT(accept()) );
+	connect( ui->bCancel,SIGNAL(clicked()), this,SLOT(reject()) );
 }
 
-GlopConfig::Settings SettingsDialog::getSettings(){
-	return newSettings;
+QString SettingsDialog::operator[](QString key)
+{
+	return QString::fromStdString(
+			settings.values[key.toStdString()]
+			);
 }
 
-void SettingsDialog::reject(){
-	QDialog::reject();
+SettingsDialog::~SettingsDialog()
+{
+	delete ui;
 }
-void SettingsDialog::accept(){
+
+
+void SettingsDialog::open()
+{
+	QDialog::open();
+	ui->eSeasonLength->setValue(
+				QString::fromStdString(settings.values["season number length"]).toInt()
+				);
+	ui->eEpisodeLength->setValue(
+				QString::fromStdString(settings.values["episode number length"]).toInt()
+				);
+	ui->eImportLocation->setText(
+				QString::fromStdString(settings.values["import location"])
+				);
+	ui->eLibraryLocation->setText(
+				QString::fromStdString(settings.values["library location"])
+				);
+
+	updateExampleRename();
+}
+
+void SettingsDialog::accept()
+{
+	// lets save the settings to the config file
+	settings.values["season number length"] =
+			ui->eSeasonLength->text().toStdString();
+	settings.values["episode number length"] =
+			ui->eEpisodeLength->text().toStdString();
+	settings.values["import location"] =
+			ui->eImportLocation->text().toStdString();
+	settings.values["library location"] =
+			ui->eLibraryLocation->text().toStdString();
+
+	QDir configLocation(QDir::homePath()+"/.config/glop_conf/simplifiedVideoLibraryRenamer.conf");
+	GlopConfig::SaveToFile(configLocation.path().toStdString(),settings);
+
 	QDialog::accept();
-	newSettings.values["season number length"] = QString::number(seasonNumberLengthEntry->value()).toStdString();
-	newSettings.values["episode number length"] = QString::number(episodeNumberLengthEntry->value()).toStdString();
+}
 
-	newSettings.values["import location"] = importLocationEntry->text().toStdString();
-	newSettings.values["library location"] = libraryLocationEntry->text().toStdString();
+void SettingsDialog::updateExampleRename()
+{
+	QString season = QString::number(3).rightJustified(ui->eSeasonLength->value(),'0');
+	QString episode = QString::number(5).rightJustified(ui->eEpisodeLength->value(),'0');
+
+	// Example Show Title.s03e005.mkv
+	QString text("Example Show Title.s#e%.mkv");
+	text.replace('#',season);
+	text.replace('%',episode);
+
+	ui->lExampleRename->setText(text);
 }
 
 void SettingsDialog::openFileDialog(){
 	QObject *sender = QObject::sender();
-	if(sender == importLocationButton){
-		QString temp = QFileDialog::getExistingDirectory(this,"Select Location",importLocationEntry->text());
+	if(sender == ui->bBrowseImport){
+		QString temp = QFileDialog::getExistingDirectory(this,"Select Location",ui->eImportLocation->text());
 		if(temp.length()>0) // handle if user hits cancel
-			importLocationEntry->setText(temp);
+			ui->eImportLocation->setText(temp);
 	}
-	if(sender == libraryLocationButton){
-		QString temp = QFileDialog::getExistingDirectory(this,"Select Location",libraryLocationEntry->text());
+	if(sender == ui->bBrowseLibrary){
+		QString temp = QFileDialog::getExistingDirectory(this,"Select Location",ui->eLibraryLocation->text());
 		if(temp.length()>0) // handle if user hits cancel
-			libraryLocationEntry->setText(temp);
+			ui->eLibraryLocation->setText(temp);
 	}
-}
-
-void SettingsDialog::setNamingExample(){
-	QString showName = "Example Show Title";
-	int seasonNumber = 3;
-	int episodeNumber = 5;
-	QString fileExtension = ".mkv";
-
-	QString seasonString = QString::number(seasonNumber);
-	while(seasonString.length()<seasonNumberLengthEntry->value()) seasonString = "0"+seasonString;  // make it long enough as per our settings
-	QString episodeString = QString::number(episodeNumber);
-	while(episodeString.length()<episodeNumberLengthEntry->value()) episodeString = "0"+episodeString;
-
-	QString newName = showName+".s"+seasonString+"e"+episodeString+fileExtension; // formated as per user settings
-	exampleNamedEpisode->setText(newName);
-}
-
-void SettingsDialog::createWidgets(){
-	seasonNumberLengthLabel = new QLabel("Season Number Length");
-	episodeNumberLengthLabel = new QLabel("Episode Number Length");
-	seasonNumberLengthEntry = new QSpinBox();
-	episodeNumberLengthEntry = new QSpinBox();
-	exampleNamedEpisode = new QLabel("example show name here");
-	importLocationButton = new QPushButton("Import Location");
-	importLocationEntry = new QLineEdit();
-	libraryLocationButton = new QPushButton("Library Location (Optional)");
-	libraryLocationEntry = new QLineEdit();
-	okButton = new QPushButton("OK");
-	cancelButton = new QPushButton("Cancel");
-
-	//==================================================
-	//all items gridded below here
-	layout = new QGridLayout(this);
-	layout->addWidget(seasonNumberLengthLabel,1,1);
-	layout->addWidget(episodeNumberLengthLabel,1,2);
-	layout->addWidget(seasonNumberLengthEntry,2,1);
-	layout->addWidget(episodeNumberLengthEntry,2,2);
-	layout->addWidget(exampleNamedEpisode,3,1,1,2);
-
-	layout->addWidget(importLocationButton,4,1,1,2);
-	layout->addWidget(importLocationEntry,5,1,1,2);
-	layout->addWidget(libraryLocationButton,6,1,1,2);
-	layout->addWidget(libraryLocationEntry,7,1,1,2);
-
-	layout->addWidget(okButton,100,1);
-	layout->addWidget(cancelButton,100,2);
-
-	this->setLayout(layout);
-
-	//==================================================
-	//setting in the values here
-	int temp;
-	temp = QString::fromStdString(newSettings.values["season number length"]).toInt();
-	seasonNumberLengthEntry->setValue( temp>0 && temp<15 ? temp : 5 );
-	temp = QString::fromStdString(newSettings.values["episode number length"]).toInt();
-	episodeNumberLengthEntry->setValue( temp>0 && temp<15 ? temp : 5 );
-	seasonNumberLengthEntry->setMaximum(14);
-	seasonNumberLengthEntry->setMinimum(1);
-	episodeNumberLengthEntry->setMaximum(14);
-	episodeNumberLengthEntry->setMinimum(1);
-
-	importLocationEntry->setText( QString::fromStdString(newSettings.values["import location"]) );
-	libraryLocationEntry->setText( QString::fromStdString(newSettings.values["library location"]) );
-
-	//==================================================
-	//connections here
-	connect(okButton,SIGNAL(clicked(bool)),this,SLOT(accept()) );
-	connect(cancelButton,SIGNAL(clicked(bool)),this,SLOT(reject()) );
-
-	connect(importLocationButton,SIGNAL(clicked(bool)),this,SLOT(openFileDialog()) );
-	connect(libraryLocationButton,SIGNAL(clicked(bool)),this,SLOT(openFileDialog()) );
-
-	connect(seasonNumberLengthEntry,SIGNAL(valueChanged(int)),this,SLOT(setNamingExample()) );
-	connect(episodeNumberLengthEntry,SIGNAL(valueChanged(int)),this,SLOT(setNamingExample()) );
 }
