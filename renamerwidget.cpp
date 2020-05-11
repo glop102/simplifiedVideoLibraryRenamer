@@ -129,7 +129,7 @@ void RenamerWidget::listSeasonContents()
 	for(int x=0; x<list.length(); x++){
 		QFileInfo file(list[x]);
 		if(autoDeleteEnabled && autoDeleteFilenames.contains(list[x]) )
-			QFile::remove(list[x]);
+			QFile::remove(path+"/"+list[x]);
 		else
 			episodeFilenames[file.completeBaseName()].push_back(file.suffix());
 	}
