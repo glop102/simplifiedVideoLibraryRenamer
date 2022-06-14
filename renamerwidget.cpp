@@ -114,25 +114,38 @@ void RenamerWidget::listSeasonContents()
 	if(!loc.exists()) return;
 
 	ui->listEpisodes->clear();
-	QStringList list = loc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	for(int x=0; x<list.length(); x++){
-		QListWidgetItem *temp = new QListWidgetItem(list[x]);
+	// List all directories at the top with a red background - these will be skipped when renaming
+	// note: we are using the background color being red as the flag to skip the item when renaming
+	QStringList directoryList = loc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for(int x=0; x<directoryList.length(); x++){
+		QListWidgetItem *temp = new QListWidgetItem(directoryList[x]);
 		temp->setBackground(Qt::red);
 		ui->listEpisodes->addItem(temp);
 	}
 
-	// We use the basename as the key and the extension added to the QStringList
+	// For convenience, we want to parse the files and group together files that only differ by their extension
+	// eg subs files should be rnamed to follow their video file
+	// The key is the baseName of thhe file, while all extensions are added to the QStringList
 	QMap<QString,QStringList> episodeFilenames;
-	bool autoDeleteEnabled = (*settingsDialog)["auto delete enable"] == "true";
-	QStringList autoDeleteFilenames = (*settingsDialog)["auto delete filenames"].split(";",Qt::SkipEmptyParts);
-	list = loc.entryList(QDir::Files);
-	for(int x=0; x<list.length(); x++){
-		QFileInfo file(list[x]);
-		if(autoDeleteEnabled && autoDeleteFilenames.contains(list[x]) )
-			QFile::remove(path+"/"+list[x]);
-		else
-			episodeFilenames[file.completeBaseName()].push_back(file.suffix());
+
+	{ // parse the filenames and group them together into our above QMap
+		bool autoDeleteEnabled = (*settingsDialog)["auto delete enable"] == "true";
+		QStringList autoDeleteFilenames = (*settingsDialog)["auto delete filenames"].split(";",Qt::SkipEmptyParts);
+		QStringList totalFileList = loc.entryList(QDir::Files);
+		for(int x=0; x<totalFileList.length(); x++){
+			QFileInfo file(totalFileList[x]);
+			if(autoDeleteEnabled && autoDeleteFilenames.contains(totalFileList[x]) )
+				// delete known useless files for user convenience
+				QFile::remove(path+"/"+totalFileList[x]);
+			else
+				// put the file in our QStringList to group similar items together
+				episodeFilenames[file.completeBaseName()].push_back(file.suffix());
+		}
 	}
+
+	// Add each of the parsed filename groups to the episode list
+	// Each entry in the episode list can be multiline, indicating multiple files for each
+	// When renaming, the same basename is given to each file on each newline but the extension is preserved
 	for(QString baseName : episodeFilenames.keys()){
 		QString listing;
 		for(QString ext : episodeFilenames[baseName]){
@@ -151,6 +164,7 @@ void RenamerWidget::listSeasonContents()
 	ui->eParsedShowName->setText(showName->text());
 	ui->eParsedSeasonNumber->setValue(seasonNumber);
 	ui->eParsedStartingEpisodeNumber->setValue(1);
+	ui->eNumberEpisodesPerFile->setValue(1);
 }
 
 void RenamerWidget::renameShow()
@@ -230,22 +244,23 @@ void RenamerWidget::renameEpisodes()
 	QString showName = ui->eParsedShowName->text();
 	int seasonNumber = ui->eParsedSeasonNumber->value();
 	int episodeNumber = ui->eParsedStartingEpisodeNumber->value();
+	int episodesPerFile = ui->eNumberEpisodesPerFile->value();
 
 	for(int row=0 ; row<ui->listEpisodes->count() ; row++){
 		auto item = ui->listEpisodes->item(row);
 		if(item->background() == Qt::red) continue;
 
-		QString newBasename = showName+
-				".s"+QString::number(seasonNumber).rightJustified((*settingsDialog)["season number length"].toInt(),'0')+
-				"e"+QString::number(episodeNumber).rightJustified((*settingsDialog)["episode number length"].toInt(),'0')
-				+"."
-				;
+		QString newBasename = showName;
+		newBasename += ".s"+QString::number(seasonNumber).rightJustified((*settingsDialog)["season number length"].toInt(),'0');
+		for(int ep=0 ; ep<episodesPerFile ; ep++,episodeNumber++){
+			newBasename += "e"+QString::number(episodeNumber).rightJustified((*settingsDialog)["episode number length"].toInt(),'0');
+		}
+		newBasename += ".";
+
 		for(QString oldFileName : item->text().split("\n",Qt::SkipEmptyParts)){
 			QString ext = QFileInfo(basePath+oldFileName).suffix();
 			renameFileOrFolder(basePath+oldFileName, basePath+newBasename+ext);
 		}
-
-		episodeNumber += 1;
 	}
 
 	listSeasonContents();
@@ -273,7 +288,7 @@ void RenamerWidget::moveSelectedFiles()
 	}else if (sender == ui->bEpisodesMoveLeft) {
 		// we have multiple files per entry for episode listings (combines .mkv and .sub files into one item
 		for(auto name_pre : ui->listEpisodes->selectedItems() )
-			for(auto name : name_pre->text().split("\n",QString::SkipEmptyParts))
+			for(auto name : name_pre->text().split("\n",Qt::SkipEmptyParts))
 				oldNames.append(name);
 		oldRoot = root+"/"+ui->listShows->currentItem()->text()+"/"+ui->listSeasons->currentItem()->text();
 		newRoot = root+"/"+ui->listShows->currentItem()->text();

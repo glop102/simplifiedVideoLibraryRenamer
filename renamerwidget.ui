@@ -249,7 +249,11 @@
       </widget>
      </item>
      <item alignment="Qt::AlignTop">
-      <widget class="QLineEdit" name="eParsedShowName"/>
+      <widget class="QLineEdit" name="eParsedShowName">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Defaults to the top level folder name. This will override this default.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_3">
@@ -270,6 +274,23 @@
      </item>
      <item>
       <widget class="QSpinBox" name="eParsedStartingEpisodeNumber"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Episodes Per File</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="eNumberEpisodesPerFile">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How many e### it applies per file. Useful if many items are combined double episodes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="maximum">
+        <number>24</number>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="bMoveEpisodesUp">
