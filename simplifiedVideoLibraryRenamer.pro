@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 5): QT += widgets
+QT       += core gui widgets
 
 TARGET = simplifiedVideoLibraryRenamer
 TEMPLATE = app
