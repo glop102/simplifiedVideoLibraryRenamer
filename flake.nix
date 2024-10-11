@@ -1,8 +1,8 @@
 {
-    inputs.nixpkgs = {
-        type = "indirect";
-        id = "nixpkgs";
-    };
+    #inputs.nixpkgs = {
+    #    type = "indirect";
+    #    id = "nixpkgs";
+    #};
     outputs = {self,nixpkgs}:
     with import nixpkgs { system = "x86_64-linux"; }; {
       packages."x86_64-linux" = {
