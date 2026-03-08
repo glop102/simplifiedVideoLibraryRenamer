@@ -32,9 +32,9 @@ After downloading a show from various sources, the files typically will have odd
 
 linux
 ```bash
-cd simplifiedVideoLibraryRenamer
 mkdir build
-qmake ../simplifiedVideoLibraryRenamer.pro
+cd build
+qmake ../src/simplifiedVideoLibraryRenamer.pro
 make
 ```
 
