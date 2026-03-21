@@ -21,6 +21,7 @@
         inherit (self.legacyPackages.${system})
           simplifiedVideoLibraryRenamer
           ;
+        default = self.legacyPackages.${system}.simplifiedVideoLibraryRenamer;
       });
       apps = forAllSystems (system: {
         simplifiedVideoLibraryRenamer = {
