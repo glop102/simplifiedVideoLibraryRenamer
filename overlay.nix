@@ -8,5 +8,8 @@ final: prev: {
     configurePhase = ''
       qmake PREFIX=$out
     '';
+    meta = {
+      description = "A program for helping automate renaming loose files for shows into seasons with normalized structure";
+    };
   }) {};
 }

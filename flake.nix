@@ -19,8 +19,15 @@
       );
       packages = forAllSystems (system: {
         inherit (self.legacyPackages.${system})
-          hello-static
+          simplifiedVideoLibraryRenamer
           ;
+      });
+      apps = forAllSystems (system: {
+        simplifiedVideoLibraryRenamer = {
+          type = "app";
+          program = "${self.legacyPackages.${system}.simplifiedVideoLibraryRenamer}/bin/simplifiedVideoLibraryRenamer";
+        };
+        default = self.apps.${system}.simplifiedVideoLibraryRenamer;
       });
     };
 }
